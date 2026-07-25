@@ -32,6 +32,10 @@ object JapaneseSortUtils {
             }
         }
 
-        return if (order == SortOrder.Descending) sortedList.reversed() else sortedList
+        if(mode.equals(WordSortMode.Alphabetical)){
+            return if (order == SortOrder.Ascending) sortedList.reversed() else sortedList
+        }else{
+            return if (order == SortOrder.Descending) sortedList.reversed() else sortedList
+        }
     }
 }

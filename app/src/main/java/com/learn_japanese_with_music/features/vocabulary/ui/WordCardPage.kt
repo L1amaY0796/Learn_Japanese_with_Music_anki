@@ -27,14 +27,10 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.res.painterResource
-import com.learn_japanese_with_music.R
 import com.learn_japanese_with_music.core.utils.JapaneseSortUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.wait
 
 enum class WordCategoryMode { All, POS, Song }
 enum class WordSortMode { Alphabetical, Time }
@@ -203,10 +199,10 @@ fun WordCardPage(
                             order = if (currentSortMode == WordSortMode.Alphabetical) currentSortOrder else null,
                             onClick = {
                                 if (currentSortMode == WordSortMode.Alphabetical) {
-                                    currentSortOrder = if (currentSortOrder == SortOrder.Ascending) SortOrder.Descending else SortOrder.Ascending
+                                    currentSortOrder = if (currentSortOrder == SortOrder.Descending) SortOrder.Ascending else SortOrder.Descending
                                 } else {
                                     currentSortMode = WordSortMode.Alphabetical
-                                    currentSortOrder = SortOrder.Ascending
+                                    currentSortOrder = SortOrder.Descending
                                 }
                             }
                         )
