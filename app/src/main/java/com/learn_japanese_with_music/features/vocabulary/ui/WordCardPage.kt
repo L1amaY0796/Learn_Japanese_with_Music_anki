@@ -36,6 +36,7 @@ import com.learn_japanese_with_music.core.components.SearchBar
 import com.learn_japanese_with_music.core.data.SettingsManager
 import com.learn_japanese_with_music.core.data.database.AppDatabase
 import com.learn_japanese_with_music.core.data.database.SavedWord
+import com.learn_japanese_with_music.features.lyrics.model.LyricLine
 import com.learn_japanese_with_music.features.lyrics.model.LyricSegment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -251,7 +252,11 @@ fun WordCardPage(
                             
                             // 過濾詞性名稱
                             val filteredPOS = posGroups.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
-                            CategoryGrid(filteredPOS) { selectedCategoryValue = it }
+                            CategoryGrid(filteredPOS) {
+                                selectedCategoryValue = it
+                                searchQuery = ""
+                                appliedSearchQuery = searchQuery
+                            }
                         }
                         WordCategoryMode.Song -> {
                             val songGroups = savedWords.groupBy { it.songTitle }
@@ -259,7 +264,11 @@ fun WordCardPage(
                             
                             // 過濾歌名
                             val filteredSongs = songList.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
-                            CategoryGrid(filteredSongs) { selectedCategoryValue = it }
+                            CategoryGrid(filteredSongs) {
+                                selectedCategoryValue = it
+                                searchQuery = ""
+                                appliedSearchQuery = searchQuery
+                            }
                         }
                     }
                 }
