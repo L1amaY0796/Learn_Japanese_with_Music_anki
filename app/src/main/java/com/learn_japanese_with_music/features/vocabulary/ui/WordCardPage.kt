@@ -322,44 +322,46 @@ fun WordCardItem(word: SavedWord, onClick: (SavedWord) -> Unit) {
             .clickable { onClick(word) },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Background (Song cover with overlay)
-            AsyncImage(
-                model = word.songCover,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
-                            startY = 50f
-                        )
-                    )
-            )
-            
+//        Box(modifier = Modifier.fillMaxSize()) {
+//            // Background (Song cover with overlay)
+//            AsyncImage(
+//                model = word.songCover,
+//                contentDescription = null,
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier.fillMaxSize()
+//            )
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .background(
+//                        Brush.verticalGradient(
+//                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
+//                            startY = 50f
+//                        )
+//                    )
+//            )
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
             // Text info
             Column(
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
                     .padding(8.dp)
             ) {
                 Text(
                     text = word.word,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = word.generalMeaning,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.9f),
-                    maxLines = 1,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -375,7 +377,7 @@ fun CategoryGrid(
 ) {
     if (categories.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("查無類別", color = MaterialTheme.colorScheme.outline)
+            Text("Category Not Found", color = MaterialTheme.colorScheme.outline)
         }
     } else {
         LazyVerticalGrid(
@@ -402,27 +404,14 @@ fun CategoryCard(title: String, coverUrl: String, onClick: (String) -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (coverUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = coverUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.4f))
-                )
-            }
             Text(
                 text = title,
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(8.dp),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = if (coverUrl.isNotEmpty()) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                color =  MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
