@@ -1,16 +1,8 @@
 package com.learn_japanese_with_music.features.vocabulary.ui
 
-import android.graphics.drawable.shapes.RoundRectShape
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -19,25 +11,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.google.gson.Gson
 import com.learn_japanese_with_music.core.components.HomeRectangleButton
 import com.learn_japanese_with_music.core.components.SearchBar
 import com.learn_japanese_with_music.core.data.SettingsManager
 import com.learn_japanese_with_music.core.data.database.AppDatabase
 import com.learn_japanese_with_music.core.data.database.SavedWord
-import com.learn_japanese_with_music.features.lyrics.model.LyricLine
 import com.learn_japanese_with_music.features.lyrics.model.LyricSegment
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -46,6 +29,7 @@ import androidx.compose.material.icons.filled.AccessTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
 
 enum class WordCategoryMode { All, POS, Song }
 enum class WordSortMode { Alphabetical, Time }
@@ -142,13 +126,13 @@ fun WordCardPage(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 // Category Selector
                 Box(modifier = Modifier.weight(1f)) {
                     Button(
                         onClick = { isMenuExpanded = true },
-                        modifier = Modifier.fillMaxWidth(0.9f),
+                        modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -156,7 +140,7 @@ fun WordCardPage(
                         ),
                     ) {
                         Row(
-                            modifier = Modifier.offset(x = (-4).dp),
+                            modifier = Modifier.offset(x = (-5).dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Icon(
@@ -179,7 +163,11 @@ fun WordCardPage(
                     DropdownMenu(
                         expanded = isMenuExpanded,
                         onDismissRequest = { isMenuExpanded = false },
-                        modifier = Modifier.fillMaxWidth(0.45f)
+                        modifier =
+                            if(categoryMode == WordCategoryMode.All || selectedCategoryValue != null)
+                                Modifier.fillMaxWidth(0.68f)
+                            else
+                                Modifier.fillMaxWidth(0.9f)
                     ) {
                         WordCategoryMode.values().forEach { mode ->
                             DropdownMenuItem(
@@ -193,9 +181,9 @@ fun WordCardPage(
                                     )
                                 },
                                 onClick = {
+                                    isMenuExpanded = false
                                     categoryMode = mode
                                     selectedCategoryValue = null
-                                    isMenuExpanded = false
                                 }
                             )
                         }
@@ -206,7 +194,7 @@ fun WordCardPage(
                 if (categoryMode == WordCategoryMode.All || selectedCategoryValue != null) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         SortTag(
                             icon = Icons.Default.SortByAlpha,
@@ -241,8 +229,8 @@ fun WordCardPage(
             Spacer(modifier = Modifier.height(10.dp))
 
             // Content Area
-            Box(modifier = Modifier.weight(1f)) {
-                if (selectedCategoryValue != null) {
+            Box(modifier = Modifier.fillMaxWidth(1f)) {
+                if (selectedCategoryValue != null) { //at word card level(except All mode)
                     // Nested View: List of words in a specific category
                     val nestedWords = savedWords.filter {
                         val inCategory = when(categoryMode) {
@@ -268,7 +256,7 @@ fun WordCardPage(
                             )
                         } else {
                             Text(
-                                text = "Category : $selectedCategoryValue",
+                                text = "Category / $categoryMode / $selectedCategoryValue" ,
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(bottom = 16.dp)
@@ -284,6 +272,7 @@ fun WordCardPage(
                         appliedSearchQuery = ""
                         searchQuery = ""
                     }
+
                 } else {
                     // Main View (Category Selection or All)
                     when (categoryMode) {
