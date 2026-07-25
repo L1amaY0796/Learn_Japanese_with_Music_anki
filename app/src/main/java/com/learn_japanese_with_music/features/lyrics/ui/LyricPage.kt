@@ -1,5 +1,6 @@
 package com.learn_japanese_with_music.features.lyrics.ui
 
+import android.R
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -202,7 +203,10 @@ fun LyricPage(
                         style = MaterialTheme.typography.labelMedium
                     )
                 else
-                    Text(text = "Error: $it", color = MaterialTheme.colorScheme.error)
+                    Column {
+                        Text(text = "Error : $it", style = MaterialTheme.typography.labelLarge,color = MaterialTheme.colorScheme.primary)
+                        Text(text = "Maybe your Genius Access Token isn't right...", style = MaterialTheme.typography.labelLarge,color = MaterialTheme.colorScheme.primary)
+                    }
             }
 
             if (lyrics != null) {
@@ -264,7 +268,7 @@ fun LyricPage(
                     }
                 }
             } else if (!isLoading && errorMessage == null) {
-                Text(text = "Search for a song to see lyrics", style = MaterialTheme.typography.labelMedium)
+                Text(text = "Search for a song to see lyrics", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             }
         }
 

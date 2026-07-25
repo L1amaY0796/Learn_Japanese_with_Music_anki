@@ -1,6 +1,7 @@
 package com.learn_japanese_with_music.features.vocabulary.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -181,20 +182,26 @@ fun VocabularyCardContent(
                 AnalysisDetails(analysis!!)
                 
                 if (isSaved) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    SectionTitle("個人筆記")
-                    OutlinedTextField(
-                        value = userNotes,
-                        onValueChange = { 
-                            userNotes = it 
-                            scope.launch(Dispatchers.IO) {
-                                database.savedWordDao().updateNotes(segment.text, contextLine, splitMode, it)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("在此輸入筆記...") },
-                        textStyle = MaterialTheme.typography.bodyMedium
-                    )
+                    Column (
+                        modifier = Modifier.padding(top = 24.dp),
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        SectionTitle("個人筆記")
+                        OutlinedTextField(
+                            value = userNotes,
+                            onValueChange = {
+                                userNotes = it
+                                scope.launch(Dispatchers.IO) {
+                                    database.savedWordDao().updateNotes(segment.text, contextLine, splitMode, it)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("在此輸入筆記...", style = MaterialTheme.typography.bodySmall) },
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                            minLines = 5
+                        )
+                    }
                 }
             }
             
@@ -270,7 +277,10 @@ fun AnalysisDetails(analysis: WordAnalysis) {
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle("常見用法")
             analysis.commonUsages.forEach { usage ->
-                Column(modifier = Modifier.padding(bottom = 12.dp)) {
+                Column(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
                     Text(
                         text = usage.japanese,
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
@@ -294,7 +304,7 @@ fun AnalysisDetails(analysis: WordAnalysis) {
 fun SectionTitle(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(bottom = 7.dp)
     )

@@ -1,4 +1,5 @@
-- [ ] 更新 `GeniusService.kt` 支援分頁參數 (`page`, `per_page`)
-- [ ] 修改 `LyricsRepository.kt` 實作過濾與日文優先排序邏輯
-- [ ] 修改 `LyricPage.kt` 實作無限捲動與分頁狀態管理
-- [ ] 驗證搜尋結果品質與自動加載功能
+- [ ] 在 `WordCardPage.kt` 中區分 `searchQuery` 與 `appliedSearchQuery`
+- [ ] 實作 `performSearch` 更新套用之關鍵字並收起鍵盤
+- [ ] 修改內容區域，讓類別過濾與單字過濾均遵循 `appliedSearchQuery`
+- [ ] 修正搜尋結果顯示邏輯，移除舊有的 `isSearching` 模式，改為情境感知顯示
+- [ ] 驗證：點擊搜尋鈕才觸發變化，清空輸入框回復原狀

@@ -48,6 +48,7 @@ fun WordCardPage(
     val scope = rememberCoroutineScope()
 
     var searchQuery by remember { mutableStateOf("") }
+    var appliedSearchQuery by remember { mutableStateOf("") }
     var categoryMode by remember { mutableStateOf(WordCategoryMode.All) }
     var savedWords by remember { mutableStateOf<List<SavedWord>>(emptyList()) }
     
@@ -59,27 +60,13 @@ fun WordCardPage(
     var selectedWordForDetail by remember { mutableStateOf<SavedWord?>(null) }
     val sheetState = rememberModalBottomSheetState()
     
-    // 搜尋狀態
-    var searchResults by remember { mutableStateOf<List<SavedWord>>(emptyList()) }
-    var isSearching by remember { mutableStateOf(false) }
-    
     val focusManager = LocalFocusManager.current
     val isImeVisible = WindowInsets.isImeVisible
 
     // 搜尋函式
     fun performSearch() {
         focusManager.clearFocus()
-        if (searchQuery.isBlank()) {
-            isSearching = false
-            return
-        }
-        
-        searchResults = savedWords.filter {
-            it.word.contains(searchQuery, ignoreCase = true) || 
-            it.generalMeaning.contains(searchQuery, ignoreCase = true) ||
-            it.contextualMeaning.contains(searchQuery, ignoreCase = true)
-        }
-        isSearching = true
+        appliedSearchQuery = searchQuery
     }
 
     // Fetch words on launch or when database changes
@@ -116,7 +103,7 @@ fun WordCardPage(
                     query = searchQuery,
                     onQueryChange = { 
                         searchQuery = it
-                        if (it.isBlank()) isSearching = false
+                        if (it.isBlank()) appliedSearchQuery = ""
                     },
                     performSearch = { performSearch() }
                 )
@@ -184,55 +171,71 @@ fun WordCardPage(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Content Area
             Box(modifier = Modifier.weight(1f)) {
-                if (isSearching) {
-                    // 顯示搜尋結果
-                    Column {
-                        Text(
-                            text = "搜尋結果: \"$searchQuery\"",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        SavedWordGrid(searchResults) { selectedWordForDetail = it }
-                    }
-                    
-                    androidx.activity.compose.BackHandler {
-                        isSearching = false
-                        searchQuery = ""
-                    }
-                } else if (selectedCategoryValue != null) {
+                if (selectedCategoryValue != null) {
                     // Nested View: List of words in a specific category
                     val nestedWords = savedWords.filter {
-                        when(categoryMode) {
+                        val inCategory = when(categoryMode) {
                             WordCategoryMode.POS -> it.partOfSpeech.contains(selectedCategoryValue!!)
                             WordCategoryMode.Song -> it.songTitle == selectedCategoryValue
                             else -> true
                         }
+                        // 同時套用搜尋過濾
+                        inCategory && (
+                            it.word.contains(appliedSearchQuery, ignoreCase = true) ||
+                            it.generalMeaning.contains(appliedSearchQuery, ignoreCase = true) ||
+                            it.contextualMeaning.contains(appliedSearchQuery, ignoreCase = true)
+                        )
                     }
                     
                     Column {
-                        Text(
-                            text = "分類: $selectedCategoryValue",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
+                        if (appliedSearchQuery.isNotBlank()) {
+                            Text(
+                                text = "搜尋「$selectedCategoryValue」中 : \"$appliedSearchQuery\"",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "分類 : $selectedCategoryValue",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                        }
                         SavedWordGrid(nestedWords) { selectedWordForDetail = it }
                     }
                     
                     // Back button for nested view
                     androidx.activity.compose.BackHandler {
                         selectedCategoryValue = null
+                        appliedSearchQuery = ""
+                        searchQuery = ""
                     }
                 } else {
-                    // Main View
+                    // Main View (Category Selection or All)
                     when (categoryMode) {
                         WordCategoryMode.All -> {
-                            SavedWordGrid(savedWords) { selectedWordForDetail = it }
+                            val filteredAll = savedWords.filter {
+                                it.word.contains(appliedSearchQuery, ignoreCase = true) ||
+                                it.generalMeaning.contains(appliedSearchQuery, ignoreCase = true) ||
+                                it.contextualMeaning.contains(appliedSearchQuery, ignoreCase = true)
+                            }
+                            Column {
+                                if (appliedSearchQuery.isNotBlank()) {
+                                    Text(
+                                        text = "搜尋全部單字 : $appliedSearchQuery",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 16.dp)
+                                    )
+                                }
+                                SavedWordGrid(filteredAll) { selectedWordForDetail = it }
+                            }
                         }
                         WordCategoryMode.POS -> {
                             val posGroups = savedWords.flatMap { 
@@ -240,13 +243,17 @@ fun WordCardPage(
                                 catch (e: Exception) { emptyList() }
                             }.distinct().filter { it != "*" }
                             
-                            CategoryGrid(posGroups, null) { selectedCategoryValue = it }
+                            // 過濾詞性名稱
+                            val filteredPOS = posGroups.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
+                            CategoryGrid(filteredPOS, null) { selectedCategoryValue = it }
                         }
                         WordCategoryMode.Song -> {
                             val songGroups = savedWords.groupBy { it.songTitle }
                             val songList = songGroups.map { it.key to it.value.first().songCover }
                             
-                            CategoryGrid(songList.map { it.first }, songList) { selectedCategoryValue = it }
+                            // 過濾歌名
+                            val filteredSongs = songList.filter { it.first.contains(appliedSearchQuery, ignoreCase = true) }
+                            CategoryGrid(filteredSongs.map { it.first }, filteredSongs) { selectedCategoryValue = it }
                         }
                     }
                 }
@@ -366,15 +373,21 @@ fun CategoryGrid(
     songData: List<Pair<String, String>>? = null,
     onCategoryClick: (String) -> Unit
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(bottom = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(categories) { category ->
-            val coverUrl = songData?.find { it.first == category }?.second ?: ""
-            CategoryCard(category, coverUrl, onCategoryClick)
+    if (categories.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("查無類別", color = MaterialTheme.colorScheme.outline)
+        }
+    } else {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(categories) { category ->
+                val coverUrl = songData?.find { it.first == category }?.second ?: ""
+                CategoryCard(category, coverUrl, onCategoryClick)
+            }
         }
     }
 }
