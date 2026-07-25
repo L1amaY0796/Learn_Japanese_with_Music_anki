@@ -1,6 +1,7 @@
 package com.learn_japanese_with_music.features.vocabulary.ui
 
 import android.graphics.drawable.shapes.RoundRectShape
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,11 +39,17 @@ import com.learn_japanese_with_music.core.data.database.AppDatabase
 import com.learn_japanese_with_music.core.data.database.SavedWord
 import com.learn_japanese_with_music.features.lyrics.model.LyricLine
 import com.learn_japanese_with_music.features.lyrics.model.LyricSegment
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.SortByAlpha
+import androidx.compose.material.icons.filled.AccessTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 enum class WordCategoryMode { All, POS, Song }
+enum class WordSortMode { Alphabetical, Time }
+enum class SortOrder { Ascending, Descending }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -67,6 +74,10 @@ fun WordCardPage(
     var selectedWordForDetail by remember { mutableStateOf<SavedWord?>(null) }
     val sheetState = rememberModalBottomSheetState()
     
+    // 排序狀態
+    var currentSortMode by remember { mutableStateOf(WordSortMode.Time) }
+    var currentSortOrder by remember { mutableStateOf(SortOrder.Descending) }
+    
     val focusManager = LocalFocusManager.current
     val isImeVisible = WindowInsets.isImeVisible
 
@@ -74,6 +85,15 @@ fun WordCardPage(
     fun performSearch() {
         focusManager.clearFocus()
         appliedSearchQuery = searchQuery
+    }
+
+    // 排序邏輯函式
+    fun sortWords(words: List<SavedWord>): List<SavedWord> {
+        val sorted = when (currentSortMode) {
+            WordSortMode.Alphabetical -> words.sortedBy { it.reading.ifEmpty { it.word } }
+            WordSortMode.Time -> words.sortedBy { it.timestamp }
+        }
+        return if (currentSortOrder == SortOrder.Descending) sorted.reversed() else sorted
     }
 
     // Fetch words on launch or when database changes
@@ -118,60 +138,100 @@ fun WordCardPage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Category Selector
-            Box(modifier = Modifier.fillMaxWidth(0.5f)) {
-                Button(
-                    onClick = { isMenuExpanded = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-
-                ) {
-                    Row(
-                        modifier = Modifier.offset(-9.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+            // Category Selector and Sort Controls
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Category Selector
+                Box(modifier = Modifier.weight(1f)) {
+                    Button(
+                        onClick = { isMenuExpanded = true },
+                        modifier = Modifier.fillMaxWidth(0.9f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
                     ) {
-                        if(isMenuExpanded)
-                            Icon(imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "category selector down",
+                        Row(
+                            modifier = Modifier.offset(x = (-4).dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = if (isMenuExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
+                                contentDescription = null,
                             )
-                        else
-                            Icon(imageVector = Icons.Default.ArrowRight,
-                                contentDescription = "category selector right",
+                            Text(
+                                text = "Category : ${
+                                    when (categoryMode) {
+                                        WordCategoryMode.All -> "All"
+                                        WordCategoryMode.POS -> "POS."
+                                        WordCategoryMode.Song -> "Song"
+                                    }
+                                }",
+                                style = MaterialTheme.typography.labelLarge,
                             )
-                        Text(
-                            text = "Category : ${when(categoryMode) {
-                                WordCategoryMode.All -> "All"
-                                WordCategoryMode.POS -> "POS."
-                                WordCategoryMode.Song -> "Song"
-                            }}",
-                            style = MaterialTheme.typography.labelLarge,
-                        )
+                        }
+                    }
+
+                    DropdownMenu(
+                        expanded = isMenuExpanded,
+                        onDismissRequest = { isMenuExpanded = false },
+                        modifier = Modifier.fillMaxWidth(0.45f)
+                    ) {
+                        WordCategoryMode.values().forEach { mode ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        when (mode) {
+                                            WordCategoryMode.All -> "All"
+                                            WordCategoryMode.POS -> "POS."
+                                            WordCategoryMode.Song -> "Song"
+                                        }
+                                    )
+                                },
+                                onClick = {
+                                    categoryMode = mode
+                                    selectedCategoryValue = null
+                                    isMenuExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
 
-                
-                DropdownMenu(
-                    expanded = isMenuExpanded,
-                    onDismissRequest = { isMenuExpanded = false },
-                    modifier = Modifier.fillMaxWidth(0.45f)
-                ) {
-                    WordCategoryMode.values().forEach { mode ->
-                        DropdownMenuItem(
-                            text = { 
-                                Text(when(mode) {
-                                    WordCategoryMode.All -> "All"
-                                    WordCategoryMode.POS -> "POS."
-                                    WordCategoryMode.Song -> "Song"
-                                })
-                            },
+                // Sort Controls (Only visible when list is shown)
+                if (categoryMode == WordCategoryMode.All || selectedCategoryValue != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        SortTag(
+                            icon = Icons.Default.SortByAlpha,
+                            isSelected = currentSortMode == WordSortMode.Alphabetical,
+                            order = if (currentSortMode == WordSortMode.Alphabetical) currentSortOrder else null,
                             onClick = {
-                                categoryMode = mode
-                                selectedCategoryValue = null
-                                isMenuExpanded = false
+                                if (currentSortMode == WordSortMode.Alphabetical) {
+                                    currentSortOrder = if (currentSortOrder == SortOrder.Ascending) SortOrder.Descending else SortOrder.Ascending
+                                } else {
+                                    currentSortMode = WordSortMode.Alphabetical
+                                    currentSortOrder = SortOrder.Ascending
+                                }
+                            }
+                        )
+                        SortTag(
+                            icon = Icons.Default.AccessTime,
+                            isSelected = currentSortMode == WordSortMode.Time,
+                            order = if (currentSortMode == WordSortMode.Time) currentSortOrder else null,
+                            onClick = {
+                                if (currentSortMode == WordSortMode.Time) {
+                                    currentSortOrder = if (currentSortOrder == SortOrder.Ascending) SortOrder.Descending else SortOrder.Ascending
+                                } else {
+                                    currentSortMode = WordSortMode.Time
+                                    currentSortOrder = SortOrder.Descending // 預設最新優先
+                                }
                             }
                         )
                     }
@@ -214,7 +274,8 @@ fun WordCardPage(
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
                         }
-                        SavedWordGrid(nestedWords) { selectedWordForDetail = it }
+                        val sortedNested = sortWords(nestedWords)
+                        SavedWordGrid(sortedNested) { selectedWordForDetail = it }
                     }
                     
                     // Back button for nested view
@@ -241,7 +302,8 @@ fun WordCardPage(
                                         modifier = Modifier.padding(bottom = 16.dp)
                                     )
                                 }
-                                SavedWordGrid(filteredAll) { selectedWordForDetail = it }
+                                val sortedAll = sortWords(filteredAll)
+                                SavedWordGrid(sortedAll) { selectedWordForDetail = it }
                             }
                         }
                         WordCategoryMode.POS -> {
@@ -301,6 +363,42 @@ fun WordCardPage(
                     splitMode = word.splitMode,
                     songTitle = word.songTitle,
                     songArtist = word.songArtist
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SortTag(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    order: SortOrder?,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)) else null,
+        modifier = Modifier.size(40.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(20.dp)
+            )
+            if (isSelected && order != null) {
+                Icon(
+                    imageVector = if (order == SortOrder.Ascending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(12.dp)
+                        .align(Alignment.TopEnd)
+                        .offset(x = (-2).dp, y = 2.dp)
                 )
             }
         }

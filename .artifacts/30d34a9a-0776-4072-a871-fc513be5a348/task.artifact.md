@@ -1,8 +1,6 @@
-- [x] 更新 `LyricsModels.kt` (新增 `dictionaryForm` 欄位至 `LyricSegment`)
-- [x] 更新 `SavedWord.kt` 與 `WordCache.kt` (新增 `dictionaryForm`, 移除 `SavedWord` 中的 `songCover`)
-- [x] 更新 `AppDatabase.kt` (提升至 Version 3 並確保毀滅性遷移)
-- [x] 修改 `JapaneseProcessor.kt` (提取 `dictionaryForm`)
-- [x] 修改 `VocabularyCard.kt` (顯示辭書型並移除封面圖邏輯)
-- [x] 修改 `LyricPage.kt` (移除封面圖參數傳遞)
-- [x] 修改 `WordCardPage.kt` (移除封面圖相關 UI 顯示)
-- [x] 驗證：辭書型正確顯示且資料庫遷移成功
+- [x] 定義 `WordSortMode` 與 `SortOrder` 枚舉
+- [x] 在 `WordCardPage.kt` 中加入排序相關狀態變數
+- [x] 實作單字列表排序邏輯
+- [x] 在介面上新增排序控制項 (五十音、加入時間)
+- [x] 實作點擊切換排序與正反序功能
+- [x] 驗證：不同分類下排序皆正常運作

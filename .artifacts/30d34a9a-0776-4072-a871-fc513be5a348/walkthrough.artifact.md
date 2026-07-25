@@ -1,29 +1,35 @@
-# Walkthrough - 新增辭書型顯示與 Word Card UI 優化
+# Walkthrough - Word Card 排序功能實作
 
-本任務已成功在單字卡中新增了「辭書型 (Dictionary Form)」的顯示，並同步優化了 Word Card 頁面的介面，移除了冗餘的封面圖參數。
+本任務已成功為 Word Card 頁面實作了多維度的排序功能，讓使用者能更靈活地管理與複習收藏的單字。
 
 ## 變更內容
 
-### 1. 單字分析增強 (辭書型)
-- **[JapaneseProcessor.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/lyrics/processor/JapaneseProcessor.kt)**：更新了分詞邏輯，現在會從 Sudachi 的分析結果中正確提取單字的「辭書型」（即動詞/形容詞的原形）。
-- **[VocabularyCard.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/VocabularyCard.kt)**：在單字詳情彈窗中，如果單字的辭書型與表面文字不同，會額外顯示「原形: XXX」，幫助使用者學習。
+### 1. 多樣化的排序模式
+- **[WordCardPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/WordCardPage.kt)**：
+    - 引入了 `WordSortMode`（五十音序、加入時間）與 `SortOrder`（正序、反序）狀態管理。
+    - **五十音序 (Alphabetical)**：根據單字的讀音進行排序，方便按字典順序查找。
+    - **加入時間 (Time)**：根據收藏的時間戳記排序，方便複習最近學習的內容。
 
-### 2. UI 簡約化與資料庫優化
-- **移除封面圖**：根據需求，移除了 [WordCardPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/WordCardPage.kt) 中所有關於 `songCover` 的顯示與參數傳遞。這讓介面看起來更乾淨，專注於文字學習。
-- **資料庫升級 (Migration)**：
-    - 將 [AppDatabase.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/core/data/database/AppDatabase.kt) 提升至 **Version 3**。
-    - 啟用了 `fallbackToDestructiveMigration()`，這會確保在結構變動時 App 能穩定運行而不閃退（注意：此操作會重置現有單字收藏）。
-    - 移除了 `SavedWord` 實體中的 `songCover` 欄位，減少了資料庫的存儲開銷。
+### 2. 直覺的 UI 控制項 (Sort Controls)
+- 在分類選擇器右側新增了兩個動態標籤圖示：
+    - **`A-Z` 圖示**：對應五十音排序。
+    - **時鐘圖示**：對應時間排序。
+- **互動設計**：
+    - 點擊標籤切換排序方式，圖示會以 Highlight 顏色顯示當前選中的模式。
+    - **二次點擊**：再次點擊已選中的標籤可立即切換「正序/反序」，並在右上角顯示對應的箭頭（↑ 或 ↓）。
 
-### 3. 資料結構同步更新
-- 更新了 `LyricSegment`, `SavedWord`, 與 `WordCache` 以包含全新的 `dictionaryForm` 欄位。
+### 3. 智慧顯示邏輯
+- **按需出現**：排序控制項僅在顯示具體單字清單時（「全部」視圖或進入特定類別後）才會出現，保持類別導覽介面的簡潔。
+
+### 4. 排序邏輯實作
+- 實作了高效的 `sortWords` 函式，能針對搜尋過濾後的結果進行二次排序，確保搜尋與排序功能的完美結合。
 
 ## 驗證結果
 - [x] Gradle 編譯成功。
-- [x] 點擊歌詞單字可看到「原形」顯示。
-- [x] Word Card 頁面已不再顯示歌曲封面背景，並成功適配新的純色卡片風格。
-- [x] 資料庫成功遷移，無閃退現象。
+- [x] 在「全部」模式下，可自由切換五十音與時間排序。
+- [x] 點擊標籤可正確切換正反序（例如：最新收藏優先 或 最早收藏優先）。
+- [x] 排序狀態在切換搜尋關鍵字時仍能保持有效。
 
 > [!TIP]
-> **學習建議**
-> 辭書型是日文學習的核心。現在您可以直接在單字卡看到動詞的原貌，這對於查詢文法書或理解變語法非常有幫助！
+> **操作小技巧**
+> 預設情況下，系統採用「最新加入優先」的排序方式。如果您正在進行地毯式的單字複習，建議切換到「五十音序」的正序排列，這會更有系統性！
