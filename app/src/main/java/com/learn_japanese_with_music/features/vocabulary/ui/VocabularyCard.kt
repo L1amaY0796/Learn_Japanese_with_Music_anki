@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -248,10 +249,10 @@ fun VocabularyCardContent(
                 },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp)
+                    .padding(end = 8.dp)
             ) {
                 Icon(
-                    imageVector = if (isSaved) Icons.Default.Delete else Icons.Default.Add,
+                    imageVector = if (isSaved) Icons.Default.Delete else Icons.Default.AddToPhotos,
                     contentDescription = if (isSaved) "Remove" else "Save",
                     tint = if (isSaved) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
