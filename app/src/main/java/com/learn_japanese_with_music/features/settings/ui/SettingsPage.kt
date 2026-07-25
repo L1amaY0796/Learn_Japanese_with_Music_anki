@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.learn_japanese_with_music.core.components.HomeRectangleButton
+import com.learn_japanese_with_music.core.components.MenuButton
 import com.learn_japanese_with_music.core.data.SettingsManager
 import com.worksap.nlp.sudachi.Tokenizer
 
@@ -38,7 +38,7 @@ fun SettingsPage(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HomeRectangleButton(onClick = {
+                MenuButton(onClick = {
                     focusManager.clearFocus()
                     onMenuClick()
                 })

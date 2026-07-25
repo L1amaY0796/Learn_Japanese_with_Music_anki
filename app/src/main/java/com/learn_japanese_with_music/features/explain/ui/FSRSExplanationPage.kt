@@ -1,4 +1,4 @@
-package com.learn_japanese_with_music.features.vocabulary.ui
+package com.learn_japanese_with_music.features.explain.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.learn_japanese_with_music.core.components.HomeRectangleButton
+import com.learn_japanese_with_music.core.components.MenuButton
 
 @Composable
 fun FSRSExplanationPage(
@@ -30,7 +30,7 @@ fun FSRSExplanationPage(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HomeRectangleButton(onClick = onMenuClick)
+                MenuButton(onClick = onMenuClick)
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = "複習演算法說明",
@@ -59,12 +59,12 @@ fun FSRSExplanationPage(
 
                 ExplanationSection(
                     title = "DSR 三元模型",
-                    content = "• 熟悉度 (Retrievability): 您當下能想起該單字的機率。\n• 穩定度 (Stability): 記憶能維持多久。穩定度越高，複習間隔越長。\n• 難度 (Difficulty): 單字對您而言的複雜程度。"
+                    content = "• 熟悉度 (Retrievability): \n您當下能想起該單字的機率。\n• 穩定度 (Stability): \n記憶能維持多久。穩定度越高，複習間隔越長。\n• 難度 (Difficulty): \n單字對您而言的複雜程度。"
                 )
 
                 ExplanationSection(
                     title = "四種評分與回饋",
-                    content = "• Again (忘記): 重置記憶，進入重新學習步幅。\n• Hard (困難): 熟悉度不足，系統會稍微縮短下次複習間隔。\n• Good (良好): 標準間隔成長。\n• Easy (簡單): 秒答，系統會大幅推遲下次複習日期。"
+                    content = "• Again (忘記): \n重置記憶，進入重新學習步幅。\n• Hard (困難): \n熟悉度不足，系統會稍微縮短下次複習間隔。\n• Good (良好): 標準間隔成長。\n• Easy (簡單): \n秒答，系統會大幅推遲下次複習日期。"
                 )
 
                 ExplanationSection(
@@ -89,7 +89,7 @@ fun ExplanationSection(title: String, content: String) {
         )
         Text(
             text = content,
-            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
+            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 33.sp),
             color = MaterialTheme.colorScheme.onBackground
         )
     }

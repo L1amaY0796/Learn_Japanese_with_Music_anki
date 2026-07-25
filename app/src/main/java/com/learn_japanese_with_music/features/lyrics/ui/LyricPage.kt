@@ -17,30 +17,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -59,12 +50,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.google.ai.client.generativeai.type.content
-import com.learn_japanese_with_music.core.components.HomeRectangleButton
+import com.learn_japanese_with_music.core.components.MenuButton
+import com.learn_japanese_with_music.core.components.ReturnButton
 import com.learn_japanese_with_music.core.components.SearchBar
 import com.learn_japanese_with_music.core.data.SettingsManager
 import com.learn_japanese_with_music.features.lyrics.model.GeniusSong
@@ -176,7 +166,7 @@ fun LyricPage(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(modifier = Modifier.padding(end = 8.dp)){
-                        HomeRectangleButton(onClick = {
+                        MenuButton(onClick = {
                             focusManager.clearFocus()
                             onMenuClick()
                         })
@@ -210,23 +200,39 @@ fun LyricPage(
             }
 
             if (lyrics != null) {
+
                 BackHandler {
                     lyrics = null
                 }
 
-                //display lyrics
-                LyricsDisplay(
-                    songData = lyrics!!,
-                    modifier = Modifier.weight(1f),
-                    onSegmentClick = { segment, contextLine ->
-                        selectedSegment = segment
-                        selectedContextLine = contextLine
-                        showBottomSheet = true
-                    }
-                )
+                Column (
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ){
+                    Row (
+                       horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ){
+                        ReturnButton(
+                            onClick = { lyrics = null}
+                        )
 
-                //show the result of searching
-            } else if (searchResults.isNotEmpty()) {
+                        MenuButton(
+                            onClick = { onMenuClick() }
+                        )
+                    }
+
+
+                    //display lyrics
+                    LyricsDisplay(
+                        songData = lyrics!!,
+                        modifier = Modifier.weight(1f),
+                        onSegmentClick = { segment, contextLine ->
+                            selectedSegment = segment
+                            selectedContextLine = contextLine
+                            showBottomSheet = true
+                        }
+                    )
+                }
+            } else if (searchResults.isNotEmpty()) {//show the result of searching
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.weight(1f),

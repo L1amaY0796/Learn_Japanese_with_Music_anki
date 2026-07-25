@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Search
@@ -41,7 +40,7 @@ import com.learn_japanese_with_music.features.lyrics.repository.LyricsRepository
 import com.learn_japanese_with_music.features.lyrics.ui.LyricPage
 import com.learn_japanese_with_music.features.settings.ui.SettingsPage
 import com.learn_japanese_with_music.features.vocabulary.ui.WordCardPage
-import com.learn_japanese_with_music.features.vocabulary.ui.FSRSExplanationPage
+import com.learn_japanese_with_music.features.explain.ui.FSRSExplanationPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -121,7 +120,7 @@ class MainActivity : ComponentActivity() {
                                 )
 
                                 NavigationDrawerItem(
-                                    label = { Text("Review Guide", style = MaterialTheme.typography.titleMedium) },
+                                    label = { Text("Review Scheme", style = MaterialTheme.typography.titleMedium) },
                                     selected = currentScreen == Screen.FSRSExplanation,
                                     onClick = {
                                         currentScreen = Screen.FSRSExplanation

@@ -198,7 +198,8 @@ fun VocabularyCardContent(
                 savedWord?.let { word ->
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (word.state == 4) {
                             Badge(text = "SUSPENDED", color = MaterialTheme.colorScheme.errorContainer)
