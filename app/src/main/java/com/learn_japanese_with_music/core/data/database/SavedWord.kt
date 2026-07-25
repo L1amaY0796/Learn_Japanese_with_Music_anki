@@ -17,5 +17,14 @@ data class SavedWord(
     val notes: String = "",
     val songTitle: String,
     val songArtist: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    
+    // FSRS Fields
+    val difficulty: Double = 0.0,
+    val stability: Double = 0.0,
+    val reps: Int = 0,
+    val lapses: Int = 0,
+    val lastReviewed: Long = 0,
+    val state: Int = 0, // 0: New, 1: Learning, 2: Review, 3: Relearning
+    val due: Long = 0 // Unix timestamp in milliseconds
 )

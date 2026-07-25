@@ -14,6 +14,12 @@ interface SavedWordDao {
     @Query("SELECT * FROM SavedWord ORDER BY timestamp DESC")
     suspend fun getAllSavedWords(): List<SavedWord>
 
+    @Query("SELECT * FROM SavedWord WHERE due <= :currentTime AND state < 4 ORDER BY due ASC")
+    suspend fun getDueWords(currentTime: Long): List<SavedWord>
+
+    @Query("UPDATE SavedWord SET difficulty = :difficulty, stability = :stability, reps = :reps, lapses = :lapses, lastReviewed = :lastReviewed, state = :state, due = :due WHERE word = :word AND contextLine = :contextLine AND splitMode = :splitMode")
+    suspend fun updateFSRSStatus(word: String, contextLine: String, splitMode: String, difficulty: Double, stability: Double, reps: Int, lapses: Int, lastReviewed: Long, state: Int, due: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSavedWord(savedWord: SavedWord)
 

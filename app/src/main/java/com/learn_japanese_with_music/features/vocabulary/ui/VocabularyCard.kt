@@ -1,5 +1,7 @@
 package com.learn_japanese_with_music.features.vocabulary.ui
 
+import android.R
+import androidx.annotation.Nullable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
@@ -9,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -54,6 +57,7 @@ fun VocabularyCardContent(
     
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var savedWord by remember { mutableStateOf<SavedWord?>(null) }
 
     LaunchedEffect(segment, contextLine, splitMode) {
         isLoading = true
@@ -65,6 +69,7 @@ fun VocabularyCardContent(
         }
 
         if (saved != null) {
+            savedWord = saved
             isSaved = true
             userNotes = saved.notes
             val listType = object : TypeToken<List<UsageExample>>() {}.type
@@ -190,15 +195,57 @@ fun VocabularyCardContent(
             } else if (error != null) {
                 Text(text = error!!, color = MaterialTheme.colorScheme.error)
             } else if (analysis != null) {
+                // FSRS Status Badges
+                savedWord?.let { word ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        if (word.state == 4) {
+                            Badge(text = "SUSPENDED", color = MaterialTheme.colorScheme.errorContainer)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            TextButton(
+                                onClick = {
+                                    scope.launch(Dispatchers.IO) {
+                                        // Unsuspend: Reset to Learning or Review state
+                                        database.savedWordDao().updateFSRSStatus(
+                                            word.word, word.contextLine, word.splitMode,
+                                            word.difficulty, word.stability, word.reps, 
+                                            0, // Reset lapses to 0
+                                            System.currentTimeMillis(),
+                                            1, // Back to Learning
+                                            System.currentTimeMillis() // Due now
+                                        )
+                                        // Update local state
+                                        savedWord = database.savedWordDao().getSavedWord(word.word, word.contextLine, word.splitMode)
+                                    }
+                                }
+                            ) {
+                                Text("Unsuspend", style = MaterialTheme.typography.labelLarge)
+                            }
+                        } else if (word.lapses >= 6) {
+                            Badge(text = "LEECH", color = MaterialTheme.colorScheme.secondaryContainer)
+                        }
+                    }
+                }
+
                 AnalysisDetails(analysis!!)
                 
                 if (isSaved) {
                     Column (
-                        modifier = Modifier.padding(top = 24.dp),
+                        modifier = Modifier.padding(top = 15.dp),
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
-                        SectionTitle("個人筆記")
+                        Row() {
+                            SectionTitle("個人筆記")
+                            Icon(
+                                modifier = Modifier.padding(start = 3.dp),
+                                imageVector = Icons.Default.EditNote,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         OutlinedTextField(
                             value = userNotes,
                             onValueChange = {
@@ -251,6 +298,7 @@ fun VocabularyCardContent(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 8.dp)
+                    .offset(y = (-18).dp, x = (-4).dp)
             ) {
                 Icon(
                     imageVector = if (isSaved) Icons.Default.Delete else Icons.Default.AddToPhotos,
@@ -305,6 +353,7 @@ fun AnalysisDetails(analysis: WordAnalysis) {
                         text = usage.translation,
                         style = MaterialTheme.typography.labelLarge
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
         }

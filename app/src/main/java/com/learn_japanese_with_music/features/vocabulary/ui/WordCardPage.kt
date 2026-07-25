@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.gson.Gson
 import com.learn_japanese_with_music.core.components.HomeRectangleButton
@@ -63,6 +64,10 @@ fun WordCardPage(
     var currentSortMode by remember { mutableStateOf(WordSortMode.Time) }
     var currentSortOrder by remember { mutableStateOf(SortOrder.Descending) }
     
+    // FSRS Review state
+    var isReviewing by remember { mutableStateOf(false) }
+    var dueCount by remember { mutableIntStateOf(0) }
+    
     val focusManager = LocalFocusManager.current
     val isImeVisible = WindowInsets.isImeVisible
 
@@ -86,269 +91,308 @@ fun WordCardPage(
         }
     }
 
+    LaunchedEffect(savedWords) {
+        dueCount = withContext(Dispatchers.IO) {
+            database.savedWordDao().getDueWords(System.currentTimeMillis()).size
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 48.dp, start = 16.dp, end = 16.dp)
-        ) {
-            // Top Bar: Home + Search
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 48.dp, start = 16.dp, end = 16.dp)
             ) {
-                HomeRectangleButton(
-                    onClick = {
-                        onMenuClick()
-                        focusManager.clearFocus()
-                    }
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                SearchBar(
-                    query = searchQuery,
-                    onQueryChange = { 
-                        searchQuery = it
-                        if (it.isBlank()) appliedSearchQuery = ""
-                    },
-                    performSearch = { performSearch() }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Category Selector and Sort Controls
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                // Category Selector
-                Box(modifier = Modifier.weight(1f)) {
-                    Button(
-                        onClick = { isMenuExpanded = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                    ) {
-                        Row(
-                            modifier = Modifier.offset(x = (-5).dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = if (isMenuExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
-                                contentDescription = null,
-                            )
-                            Text(
-                                text = "Category : ${
-                                    when (categoryMode) {
-                                        WordCategoryMode.All -> "All"
-                                        WordCategoryMode.POS -> "POS."
-                                        WordCategoryMode.Song -> "Song"
-                                    }
-                                }",
-                                style = MaterialTheme.typography.labelLarge,
-                            )
+                // Top Bar: Home + Search
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    HomeRectangleButton(
+                        onClick = {
+                            onMenuClick()
+                            focusManager.clearFocus()
                         }
-                    }
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    SearchBar(
+                        query = searchQuery,
+                        onQueryChange = { 
+                            searchQuery = it
+                            if (it.isBlank()) appliedSearchQuery = ""
+                        },
+                        performSearch = { performSearch() }
+                    )
+                }
 
-                    DropdownMenu(
-                        expanded = isMenuExpanded,
-                        onDismissRequest = { isMenuExpanded = false },
-                        modifier =
-                            if(categoryMode == WordCategoryMode.All || selectedCategoryValue != null)
-                                Modifier.fillMaxWidth(0.68f)
-                            else
-                                Modifier.fillMaxWidth(0.9f)
-                    ) {
-                        WordCategoryMode.values().forEach { mode ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        when (mode) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Category Selector and Sort Controls
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    // Category Selector
+                    Box(modifier = Modifier.weight(1f)) {
+                        Button(
+                            onClick = { isMenuExpanded = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                        ) {
+                            Row(
+                                modifier = Modifier.offset(x = (-5).dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    imageVector = if (isMenuExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowRight,
+                                    contentDescription = null,
+                                )
+                                Text(
+                                    text = "Category : ${
+                                        when (categoryMode) {
                                             WordCategoryMode.All -> "All"
                                             WordCategoryMode.POS -> "POS."
                                             WordCategoryMode.Song -> "Song"
                                         }
-                                    )
-                                },
+                                    }",
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = isMenuExpanded,
+                            onDismissRequest = { isMenuExpanded = false },
+                            modifier =
+                                if(categoryMode == WordCategoryMode.All || selectedCategoryValue != null)
+                                    Modifier.fillMaxWidth(0.68f)
+                                else
+                                    Modifier.fillMaxWidth(0.9f)
+                        ) {
+                            WordCategoryMode.values().forEach { mode ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            when (mode) {
+                                                WordCategoryMode.All -> "All"
+                                                WordCategoryMode.POS -> "POS."
+                                                WordCategoryMode.Song -> "Song"
+                                            }
+                                        )
+                                    },
+                                    onClick = {
+                                        isMenuExpanded = false
+                                        categoryMode = mode
+                                        selectedCategoryValue = null
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Sort Controls (Only visible when list is shown)
+                    if (categoryMode == WordCategoryMode.All || selectedCategoryValue != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            SortTag(
+                                icon = Icons.Default.SortByAlpha,
+                                isSelected = currentSortMode == WordSortMode.Alphabetical,
+                                order = if (currentSortMode == WordSortMode.Alphabetical) currentSortOrder else null,
                                 onClick = {
-                                    isMenuExpanded = false
-                                    categoryMode = mode
-                                    selectedCategoryValue = null
+                                    if (currentSortMode == WordSortMode.Alphabetical) {
+                                        currentSortOrder = if (currentSortOrder == SortOrder.Descending) SortOrder.Ascending else SortOrder.Descending
+                                    } else {
+                                        currentSortMode = WordSortMode.Alphabetical
+                                        currentSortOrder = SortOrder.Descending
+                                    }
+                                }
+                            )
+                            SortTag(
+                                icon = Icons.Default.AccessTime,
+                                isSelected = currentSortMode == WordSortMode.Time,
+                                order = if (currentSortMode == WordSortMode.Time) currentSortOrder else null,
+                                onClick = {
+                                    if (currentSortMode == WordSortMode.Time) {
+                                        currentSortOrder = if (currentSortOrder == SortOrder.Ascending) SortOrder.Descending else SortOrder.Ascending
+                                    } else {
+                                        currentSortMode = WordSortMode.Time
+                                        currentSortOrder = SortOrder.Descending // 預設最新優先
+                                    }
                                 }
                             )
                         }
                     }
                 }
 
-                // Sort Controls (Only visible when list is shown)
-                if (categoryMode == WordCategoryMode.All || selectedCategoryValue != null) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        SortTag(
-                            icon = Icons.Default.SortByAlpha,
-                            isSelected = currentSortMode == WordSortMode.Alphabetical,
-                            order = if (currentSortMode == WordSortMode.Alphabetical) currentSortOrder else null,
-                            onClick = {
-                                if (currentSortMode == WordSortMode.Alphabetical) {
-                                    currentSortOrder = if (currentSortOrder == SortOrder.Descending) SortOrder.Ascending else SortOrder.Descending
-                                } else {
-                                    currentSortMode = WordSortMode.Alphabetical
-                                    currentSortOrder = SortOrder.Descending
-                                }
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Content Area
+                Box(modifier = Modifier.fillMaxWidth(1f)) {
+                    if (selectedCategoryValue != null) { //at word card level(except All mode)
+                        // Nested View: List of words in a specific category
+                        val nestedWords = savedWords.filter {
+                            val inCategory = when(categoryMode) {
+                                WordCategoryMode.POS -> it.partOfSpeech.contains(selectedCategoryValue!!)
+                                WordCategoryMode.Song -> it.songTitle == selectedCategoryValue
+                                else -> true
                             }
-                        )
-                        SortTag(
-                            icon = Icons.Default.AccessTime,
-                            isSelected = currentSortMode == WordSortMode.Time,
-                            order = if (currentSortMode == WordSortMode.Time) currentSortOrder else null,
-                            onClick = {
-                                if (currentSortMode == WordSortMode.Time) {
-                                    currentSortOrder = if (currentSortOrder == SortOrder.Ascending) SortOrder.Descending else SortOrder.Ascending
-                                } else {
-                                    currentSortMode = WordSortMode.Time
-                                    currentSortOrder = SortOrder.Descending // 預設最新優先
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Content Area
-            Box(modifier = Modifier.fillMaxWidth(1f)) {
-                if (selectedCategoryValue != null) { //at word card level(except All mode)
-                    // Nested View: List of words in a specific category
-                    val nestedWords = savedWords.filter {
-                        val inCategory = when(categoryMode) {
-                            WordCategoryMode.POS -> it.partOfSpeech.contains(selectedCategoryValue!!)
-                            WordCategoryMode.Song -> it.songTitle == selectedCategoryValue
-                            else -> true
-                        }
-                        // 同時套用搜尋過濾
-                        inCategory && (
-                            it.word.contains(appliedSearchQuery, ignoreCase = true) ||
-                            it.generalMeaning.contains(appliedSearchQuery, ignoreCase = true) ||
-                            it.contextualMeaning.contains(appliedSearchQuery, ignoreCase = true)
-                        )
-                    }
-                    
-                    Column {
-                        if (appliedSearchQuery.isNotBlank()) {
-                            Text(
-                                text = "Search in「$selectedCategoryValue」for \"$appliedSearchQuery\"",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-                        } else {
-                            Text(
-                                text = "Category / $categoryMode / $selectedCategoryValue" ,
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-                        }
-                        val sortedNested = JapaneseSortUtils.sortSavedWords(nestedWords, currentSortMode, currentSortOrder)
-                        SavedWordGrid(sortedNested) { selectedWordForDetail = it }
-                    }
-                    
-                    // Back button for nested view
-                    androidx.activity.compose.BackHandler {
-                        selectedCategoryValue = null
-                        appliedSearchQuery = ""
-                        searchQuery = ""
-                    }
-
-                } else {
-                    // Main View (Category Selection or All)
-                    when (categoryMode) {
-                        WordCategoryMode.All -> {
-                            val filteredAll = savedWords.filter {
+                            // 同時套用搜尋過濾
+                            inCategory && (
                                 it.word.contains(appliedSearchQuery, ignoreCase = true) ||
                                 it.generalMeaning.contains(appliedSearchQuery, ignoreCase = true) ||
                                 it.contextualMeaning.contains(appliedSearchQuery, ignoreCase = true)
+                            )
+                        }
+                        
+                        Column {
+                            if (appliedSearchQuery.isNotBlank()) {
+                                Text(
+                                    text = "Search in「$selectedCategoryValue」for \"$appliedSearchQuery\"",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+                            } else {
+                                Text(
+                                    text = "Category / $categoryMode / $selectedCategoryValue" ,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
                             }
-                            Column {
-                                if (appliedSearchQuery.isNotBlank()) {
-                                    Text(
-                                        text = "Search through All : $appliedSearchQuery",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(bottom = 16.dp)
-                                    )
+                            val sortedNested = JapaneseSortUtils.sortSavedWords(nestedWords, currentSortMode, currentSortOrder)
+                            SavedWordGrid(sortedNested) { selectedWordForDetail = it }
+                        }
+                        
+                        // Back button for nested view
+                        androidx.activity.compose.BackHandler {
+                            selectedCategoryValue = null
+                            appliedSearchQuery = ""
+                            searchQuery = ""
+                        }
+
+                    } else {
+                        // Main View (Category Selection or All)
+                        when (categoryMode) {
+                            WordCategoryMode.All -> {
+                                val filteredAll = savedWords.filter {
+                                    it.word.contains(appliedSearchQuery, ignoreCase = true) ||
+                                    it.generalMeaning.contains(appliedSearchQuery, ignoreCase = true) ||
+                                    it.contextualMeaning.contains(appliedSearchQuery, ignoreCase = true)
                                 }
-                                val sortedAll = JapaneseSortUtils.sortSavedWords(filteredAll, currentSortMode, currentSortOrder)
-                                SavedWordGrid(sortedAll) { selectedWordForDetail = it }
+                                Column {
+                                    if (appliedSearchQuery.isNotBlank()) {
+                                        Text(
+                                            text = "Search through All : $appliedSearchQuery",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(bottom = 16.dp)
+                                        )
+                                    }
+                                    val sortedAll = JapaneseSortUtils.sortSavedWords(filteredAll, currentSortMode, currentSortOrder)
+                                    SavedWordGrid(sortedAll) { selectedWordForDetail = it }
+                                }
                             }
-                        }
-                        WordCategoryMode.POS -> {
-                            val posGroups = savedWords.flatMap { 
-                                try { Gson().fromJson<List<String>>(it.partOfSpeech, object : com.google.gson.reflect.TypeToken<List<String>>() {}.type) } 
-                                catch (e: Exception) { emptyList() }
-                            }.distinct().filter { it != "*" }
-                            
-                            // 過濾詞性名稱
-                            val filteredPOS = posGroups.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
-                            CategoryGrid(filteredPOS) {
-                                selectedCategoryValue = it
-                                searchQuery = ""
-                                appliedSearchQuery = searchQuery
+                            WordCategoryMode.POS -> {
+                                val posGroups = savedWords.flatMap { 
+                                    try { Gson().fromJson<List<String>>(it.partOfSpeech, object : com.google.gson.reflect.TypeToken<List<String>>() {}.type) } 
+                                    catch (e: Exception) { emptyList() }
+                                }.distinct().filter { it != "*" }
+                                
+                                // 過濾詞性名稱
+                                val filteredPOS = posGroups.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
+                                CategoryGrid(filteredPOS) {
+                                    selectedCategoryValue = it
+                                    searchQuery = ""
+                                    appliedSearchQuery = searchQuery
+                                }
                             }
-                        }
-                        WordCategoryMode.Song -> {
-                            val songGroups = savedWords.groupBy { it.songTitle }
-                            val songList = songGroups.map { it.key }
-                            
-                            // 過濾歌名
-                            val filteredSongs = songList.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
-                            CategoryGrid(filteredSongs) {
-                                selectedCategoryValue = it
-                                searchQuery = ""
-                                appliedSearchQuery = searchQuery
+                            WordCategoryMode.Song -> {
+                                val songGroups = savedWords.groupBy { it.songTitle }
+                                val songList = songGroups.map { it.key }
+                                
+                                // 過濾歌名
+                                val filteredSongs = songList.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
+                                CategoryGrid(filteredSongs) {
+                                    selectedCategoryValue = it
+                                    searchQuery = ""
+                                    appliedSearchQuery = searchQuery
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        // Word Detail BottomSheet
-        if (selectedWordForDetail != null) {
-            ModalBottomSheet(
-                onDismissRequest = { 
-                    selectedWordForDetail = null
-                    // Refresh words list in case something was deleted or notes changed
-                    scope.launch {
-                        savedWords = withContext(Dispatchers.IO) {
-                            database.savedWordDao().getAllSavedWords()
+            // Word Detail BottomSheet
+            if (selectedWordForDetail != null) {
+                ModalBottomSheet(
+                    onDismissRequest = { 
+                        selectedWordForDetail = null
+                        // Refresh words list in case something was deleted or notes changed
+                        scope.launch {
+                            savedWords = withContext(Dispatchers.IO) {
+                                database.savedWordDao().getAllSavedWords()
+                            }
+                        }
+                    },
+                    sheetState = sheetState
+                ) {
+                    val word = selectedWordForDetail!!
+                    val posList: List<String> = try { 
+                        Gson().fromJson(word.partOfSpeech, object : com.google.gson.reflect.TypeToken<List<String>>() {}.type) 
+                    } catch (e: Exception) { emptyList() }
+                    
+                    VocabularyCardContent(
+                        segment = LyricSegment(word.word, word.reading, word.dictionaryForm, posList),
+                        contextLine = word.contextLine,
+                        settingsManager = settingsManager,
+                        splitMode = word.splitMode,
+                        songTitle = word.songTitle,
+                        songArtist = word.songArtist
+                    )
+                }
+            }
+
+            // Sticky Bottom Review Button
+            if (dueCount > 0) {
+                Button(
+                    onClick = { isReviewing = true },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                ) {
+                    Text("Start Review ($dueCount due)", fontWeight = FontWeight.Bold)
+                }
+            }
+
+            if (isReviewing) {
+                ReviewSessionScreen(
+                    settingsManager = settingsManager,
+                    onClose = { 
+                        isReviewing = false
+                        // Refresh words
+                        scope.launch {
+                            savedWords = withContext(Dispatchers.IO) {
+                                database.savedWordDao().getAllSavedWords()
+                            }
                         }
                     }
-                },
-                sheetState = sheetState
-            ) {
-                val word = selectedWordForDetail!!
-                val posList: List<String> = try { 
-                    Gson().fromJson(word.partOfSpeech, object : com.google.gson.reflect.TypeToken<List<String>>() {}.type) 
-                } catch (e: Exception) { emptyList() }
-                
-                VocabularyCardContent(
-                    segment = LyricSegment(word.word, word.reading, word.dictionaryForm, posList),
-                    contextLine = word.contextLine,
-                    settingsManager = settingsManager,
-                    splitMode = word.splitMode,
-                    songTitle = word.songTitle,
-                    songArtist = word.songArtist
                 )
             }
         }
