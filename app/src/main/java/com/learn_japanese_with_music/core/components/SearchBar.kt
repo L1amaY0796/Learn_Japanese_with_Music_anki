@@ -1,7 +1,9 @@
 package com.learn_japanese_with_music.core.components
 
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -19,8 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import com.learn_japanese_with_music.core.theme.appTheme
 
 @Composable
 fun SearchBar(query : String,
@@ -34,13 +39,13 @@ fun SearchBar(query : String,
         placeholder = {
             Text("Search",
                 color = MaterialTheme.colorScheme.primaryContainer,
-                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 30.sp)
             )
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.08f),
         shape = CircleShape,
         textStyle = MaterialTheme.typography.bodyMedium.copy(
-            color = MaterialTheme.colorScheme.primaryContainer
+            color = MaterialTheme.colorScheme.primaryContainer,
+            fontSize = 27.sp
         ),
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = MaterialTheme.colorScheme.primaryContainer,
@@ -71,4 +76,16 @@ fun SearchBar(query : String,
             }
         },
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SearchBarPreview() {
+    appTheme {
+        SearchBar(
+            query = "Sample Search",
+            onQueryChange = {},
+            performSearch = {}
+        )
+    }
 }

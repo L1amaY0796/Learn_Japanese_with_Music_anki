@@ -1,6 +1,5 @@
-- [x] 定義 `WordSortMode` 與 `SortOrder` 枚舉
-- [x] 在 `WordCardPage.kt` 中加入排序相關狀態變數
-- [x] 實作單字列表排序邏輯
-- [x] 在介面上新增排序控制項 (五十音、加入時間)
-- [x] 實作點擊切換排序與正反序功能
-- [x] 驗證：不同分類下排序皆正常運作
+- [x] 建立 `core/utils/JapaneseSortUtils.kt` 並實作 `Collator` 排序
+- [x] 在 `WordCardPage.kt` 中引入排序工具
+- [x] 移除 `WordCardPage` 內部的舊排序邏輯
+- [x] 串接 UI 排序控制項與新邏輯
+- [x] 驗證五十音排序（あいうえお順）與正反序切換

@@ -1,6 +1,7 @@
 package com.learn_japanese_with_music.features.vocabulary.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +27,10 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.res.painterResource
+import com.learn_japanese_with_music.R
+import com.learn_japanese_with_music.core.utils.JapaneseSortUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,15 +76,6 @@ fun WordCardPage(
         appliedSearchQuery = searchQuery
     }
 
-    // 排序邏輯函式
-    fun sortWords(words: List<SavedWord>): List<SavedWord> {
-        val sorted = when (currentSortMode) {
-            WordSortMode.Alphabetical -> words.sortedBy { it.reading.ifEmpty { it.word } }
-            WordSortMode.Time -> words.sortedBy { it.timestamp }
-        }
-        return if (currentSortOrder == SortOrder.Descending) sorted.reversed() else sorted
-    }
-
     // Fetch words on launch or when database changes
     LaunchedEffect(Unit) {
         savedWords = withContext(Dispatchers.IO) {
@@ -108,7 +104,12 @@ fun WordCardPage(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HomeRectangleButton(onClick = onMenuClick)
+                HomeRectangleButton(
+                    onClick = {
+                        onMenuClick()
+                        focusManager.clearFocus()
+                    }
+                )
                 Spacer(modifier = Modifier.width(12.dp))
                 SearchBar(
                     query = searchQuery,
@@ -262,7 +263,7 @@ fun WordCardPage(
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
                         }
-                        val sortedNested = sortWords(nestedWords)
+                        val sortedNested = JapaneseSortUtils.sortSavedWords(nestedWords, currentSortMode, currentSortOrder)
                         SavedWordGrid(sortedNested) { selectedWordForDetail = it }
                     }
                     
@@ -291,7 +292,7 @@ fun WordCardPage(
                                         modifier = Modifier.padding(bottom = 16.dp)
                                     )
                                 }
-                                val sortedAll = sortWords(filteredAll)
+                                val sortedAll = JapaneseSortUtils.sortSavedWords(filteredAll, currentSortMode, currentSortOrder)
                                 SavedWordGrid(sortedAll) { selectedWordForDetail = it }
                             }
                         }

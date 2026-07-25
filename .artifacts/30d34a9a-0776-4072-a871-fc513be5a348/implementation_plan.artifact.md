@@ -1,37 +1,32 @@
-# Word Card 排序功能實作計畫
+# 修正五十音排序功能計畫
 
-本計畫旨在為 Word Card 頁面實作排序功能。使用者可以根據「五十音」或「加入時間」對收藏的單字進行排序，並支援切換正反序。
+本計畫旨在實作符合日本五十音順序（Go-juon order）的單字排序功能，並將排序邏輯抽離至獨立的工具檔案中。
 
 ## 建議的變更內容
 
-### [MODIFY] [WordCardPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/WordCardPage.kt)
+### 1. 建立排序工具類 (`core/utils`)
 
-1.  **新增排序狀態**：
-    - `enum class WordSortMode`: `Alphabetical` (五十音), `Time` (加入時間)。
-    - `enum class SortOrder`: `Ascending`, `Descending`。
-    - 狀態變數：`currentSortMode`, `currentSortOrder`。
+#### [NEW] [JapaneseSortUtils.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/core/utils/JapaneseSortUtils.kt)
+- 實作 `JapaneseSortUtils` 物件。
+- 使用 `java.text.Collator` 並設定 `Locale.JAPANESE` 來處理標準的五十音排序。
+- `Collator` 會正確處理：
+    - 平假名與片假名的混合排序。
+    - 清音、濁音、半清音的順序。
+    - 長音符號（ー）的處理。
+- 提供 `sortSavedWords` 函式，接受 `List<SavedWord>`, `WordSortMode`, 與 `SortOrder`。
 
-2.  **實作排序邏輯**：
-    - 建立一個通用函式對 `List<SavedWord>` 進行排序。
-    - **五十音序**：根據 `word` (或 `reading`) 進行排序。
-    - **加入時間**：根據 `timestamp` 進行排序。
-    - 根據 `currentSortOrder` 決定 `reverse` 與否。
+### 2. 重構 Word Card 頁面 (`features/vocabulary/ui`)
 
-3.  **UI 組件新增**：
-    - 在類別選擇器（Category Selector）右側新增一個 Row。
-    - 包含兩個可點擊的標籤（或是帶有圖示的按鈕）：「五十音」與「時間」。
-    - **互動邏輯**：
-        - 點擊不同標籤：切換模式並預設為正序。
-        - 點擊相同標籤：切換正反序（Asc <-> Desc）。
-        - 顯示狀態：使用顏色或圖示（如上下箭頭）標示目前的排序狀態。
-
-4.  **顯示時機控制**：
-    - 該排序元件僅在顯示「單字清單」時出現（即 `categoryMode == All` 或 `selectedCategoryValue != null`）。
+#### [MODIFY] [WordCardPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/WordCardPage.kt)
+- 移除內部的 `sortWords` 函式。
+- 在重組邏輯中呼叫 `JapaneseSortUtils.sortSavedWords`。
+- 確保排序依據優先使用 `reading`，若無則使用 `word`。
 
 ## 驗證計畫
 
 ### 手動驗證
-1.  **切換模式**：點擊「五十音」，確認列表依日文發音/字形排序。點擊「時間」，確認依收藏時間排序。
-2.  **切換正反序**：連續點擊「時間」，確認列表在「最新在前」與「最早在前」之間切換。
-3.  **搜尋整合**：確認在有搜尋關鍵字的情況下，排序依然有效。
-4.  **UI 連動**：確認在「類別選擇頁面」排序按鈕會自動隱藏，進入子頁面後才出現。
+1. **五十音驗證**：進入 Word Card 頁面並點擊五十音排序標籤。
+   - 確認「あ」開頭的字排在「か」前面。
+   - 確認平假名與片假名的相同讀音單字能正確排在一起。
+2. **正反序切換**：多次點擊標籤，確認 `Ascending` (あ -> ん) 與 `Descending` (ん -> あ) 切換正確。
+3. **時間排序驗證**：切換至時間排序，確認仍能依據收藏時間正確排列。
