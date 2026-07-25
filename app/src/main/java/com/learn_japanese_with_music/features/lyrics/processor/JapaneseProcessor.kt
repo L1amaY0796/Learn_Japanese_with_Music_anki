@@ -89,9 +89,10 @@ class JapaneseProcessor private constructor() {
         val segments = morphemes.map { morpheme ->
             val surface = morpheme.surface()
             val reading = morpheme.readingForm()
+            val dictForm = morpheme.dictionaryForm()
             val pos = morpheme.partOfSpeech()
             val finalReading = if (needsReading(surface, reading)) reading else ""
-            LyricSegment(text = surface, reading = finalReading, partOfSpeech = pos)
+            LyricSegment(text = surface, reading = finalReading, dictionaryForm = dictForm, partOfSpeech = pos)
         }
         return LyricLine(segments = segments)
     }

@@ -39,7 +39,6 @@ fun VocabularyCardContent(
     splitMode: String,
     songTitle: String = "Unknown",
     songArtist: String = "Unknown",
-    songCover: String = "",
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -116,6 +115,7 @@ fun VocabularyCardContent(
                             word = segment.text,
                             contextLine = contextLine,
                             splitMode = splitMode,
+                            dictionaryForm = segment.dictionaryForm,
                             jlptLevel = result.jlptLevel,
                             generalMeaning = result.generalMeaning,
                             contextualMeaning = result.contextualMeaning,
@@ -155,6 +155,15 @@ fun VocabularyCardContent(
                 ),
                 color = MaterialTheme.colorScheme.onSurface
             )
+
+            if (segment.dictionaryForm.isNotEmpty() && segment.dictionaryForm != segment.text) {
+                Text(
+                    text = "原形: ${segment.dictionaryForm}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -222,6 +231,7 @@ fun VocabularyCardContent(
                                 contextLine = contextLine,
                                 splitMode = splitMode,
                                 reading = segment.reading,
+                                dictionaryForm = segment.dictionaryForm,
                                 partOfSpeech = gson.toJson(segment.partOfSpeech),
                                 jlptLevel = analysis!!.jlptLevel,
                                 generalMeaning = analysis!!.generalMeaning,
@@ -229,8 +239,7 @@ fun VocabularyCardContent(
                                 commonUsages = gson.toJson(analysis!!.commonUsages),
                                 notes = userNotes,
                                 songTitle = songTitle,
-                                songArtist = songArtist,
-                                songCover = songCover
+                                songArtist = songArtist
                             )
                             database.savedWordDao().insertSavedWord(newSaved)
                             isSaved = true

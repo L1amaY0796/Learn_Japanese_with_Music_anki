@@ -1,5 +1,8 @@
-- [ ] 在 `WordCardPage.kt` 中區分 `searchQuery` 與 `appliedSearchQuery`
-- [ ] 實作 `performSearch` 更新套用之關鍵字並收起鍵盤
-- [ ] 修改內容區域，讓類別過濾與單字過濾均遵循 `appliedSearchQuery`
-- [ ] 修正搜尋結果顯示邏輯，移除舊有的 `isSearching` 模式，改為情境感知顯示
-- [ ] 驗證：點擊搜尋鈕才觸發變化，清空輸入框回復原狀
+- [x] 更新 `LyricsModels.kt` (新增 `dictionaryForm` 欄位至 `LyricSegment`)
+- [x] 更新 `SavedWord.kt` 與 `WordCache.kt` (新增 `dictionaryForm`, 移除 `SavedWord` 中的 `songCover`)
+- [x] 更新 `AppDatabase.kt` (提升至 Version 3 並確保毀滅性遷移)
+- [x] 修改 `JapaneseProcessor.kt` (提取 `dictionaryForm`)
+- [x] 修改 `VocabularyCard.kt` (顯示辭書型並移除封面圖邏輯)
+- [x] 修改 `LyricPage.kt` (移除封面圖參數傳遞)
+- [x] 修改 `WordCardPage.kt` (移除封面圖相關 UI 顯示)
+- [x] 驗證：辭書型正確顯示且資料庫遷移成功

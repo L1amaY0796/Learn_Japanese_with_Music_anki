@@ -1,27 +1,29 @@
-# Walkthrough - Genius 搜尋優化與無限捲動功能
+# Walkthrough - 新增辭書型顯示與 Word Card UI 優化
 
-本任務已完成 Genius API 搜尋結果的品質優化，並實作了分頁加載（無限捲動）功能，提供更流暢的找歌體驗。
+本任務已成功在單字卡中新增了「辭書型 (Dictionary Form)」的顯示，並同步優化了 Word Card 頁面的介面，移除了冗餘的封面圖參數。
 
 ## 變更內容
 
-### 1. 搜尋結果品質提升
-- **過濾雜訊**：在 [LyricsRepository.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/lyrics/repository/LyricsRepository.kt) 中實作了過濾邏輯，自動排除 `Genius Romanizations` 帳號發布的純拼音歌詞結果，讓搜尋清單更精準。
-- **日文優先排序**：新增了日文字元偵測演算法。現在系統會自動將標題或歌手包含**日文（假名或漢字）**的歌曲排列在搜尋結果的最前方。
+### 1. 單字分析增強 (辭書型)
+- **[JapaneseProcessor.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/lyrics/processor/JapaneseProcessor.kt)**：更新了分詞邏輯，現在會從 Sudachi 的分析結果中正確提取單字的「辭書型」（即動詞/形容詞的原形）。
+- **[VocabularyCard.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/VocabularyCard.kt)**：在單字詳情彈窗中，如果單字的辭書型與表面文字不同，會額外顯示「原形: XXX」，幫助使用者學習。
 
-### 2. 無限捲動 (Infinite Scroll)
-- **API 分頁支援**：更新了 [GeniusService.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/lyrics/api/GeniusService.kt)，讓搜尋請求支援 `page` 參數。
-- **自動加載邏輯**：在 [LyricPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/lyrics/ui/LyricPage.kt) 中監測滑動位置。當使用者滑動到接近列表底部時，系統會自動在背景發起下一頁的請求，並將新結果附加到清單中。
-- **UI 狀態同步**：加入了 `currentPage` 與 `isFullListLoaded` 狀態管理，確保加載過程平滑且不會重複請求。
+### 2. UI 簡約化與資料庫優化
+- **移除封面圖**：根據需求，移除了 [WordCardPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/WordCardPage.kt) 中所有關於 `songCover` 的顯示與參數傳遞。這讓介面看起來更乾淨，專注於文字學習。
+- **資料庫升級 (Migration)**：
+    - 將 [AppDatabase.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/core/data/database/AppDatabase.kt) 提升至 **Version 3**。
+    - 啟用了 `fallbackToDestructiveMigration()`，這會確保在結構變動時 App 能穩定運行而不閃退（注意：此操作會重置現有單字收藏）。
+    - 移除了 `SavedWord` 實體中的 `songCover` 欄位，減少了資料庫的存儲開銷。
 
-### 3. 視覺反饋
-- 在搜尋結果底部新增了載入指示器（CircularProgressIndicator），讓使用者在分頁加載時獲得明確的視覺反饋。
+### 3. 資料結構同步更新
+- 更新了 `LyricSegment`, `SavedWord`, 與 `WordCache` 以包含全新的 `dictionaryForm` 欄位。
 
 ## 驗證結果
 - [x] Gradle 編譯成功。
-- [x] 搜尋知名歌曲（如 "Radwimps"）時，日文原文版本會排在最前面。
-- [x] 向下滑動可持續載入更多歌曲，直到沒有更多結果。
-- [x] 成功排除拼音版的無效結果。
+- [x] 點擊歌詞單字可看到「原形」顯示。
+- [x] Word Card 頁面已不再顯示歌曲封面背景，並成功適配新的純色卡片風格。
+- [x] 資料庫成功遷移，無閃退現象。
 
 > [!TIP]
-> **搜尋小秘訣**
-> 如果您搜尋不到特定的日文歌，可以嘗試輸入日文關鍵字，由於現在有了分頁功能，您可以更輕鬆地在長清單中找到目標！
+> **學習建議**
+> 辭書型是日文學習的核心。現在您可以直接在單字卡看到動詞的原貌，這對於查詢文法書或理解變語法非常有幫助！

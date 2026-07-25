@@ -8,6 +8,7 @@ data class SavedWord(
     val contextLine: String,
     val splitMode: String,
     val reading: String,
+    val dictionaryForm: String,
     val partOfSpeech: String, // Store as JSON string or concatenated
     val jlptLevel: String,
     val generalMeaning: String,
@@ -16,6 +17,5 @@ data class SavedWord(
     val notes: String = "",
     val songTitle: String,
     val songArtist: String,
-    val songCover: String,
     val timestamp: Long = System.currentTimeMillis()
 )

@@ -1,34 +1,46 @@
-# Word Card 搜尋功能改善計畫 (更新版：按下搜尋鈕觸發)
+# Word Card 功能擴充與 UI 優化計畫 (排除排序功能)
 
-本計畫旨在優化 `WordCardPage` 的搜尋機制，使其根據當前介面狀態自動切換搜尋目標，且僅在使用者明確按下「搜尋」按鈕後才套用過濾條件。
+本計畫旨在移除冗餘的封面圖參數，並在單字卡中新增「辭書型」顯示。
 
 ## 建議的變更內容
 
-### [MODIFY] [WordCardPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/WordCardPage.kt)
+### 1. 資料模型與資料庫更新
 
-1.  **狀態管理優化**：
-    - 區分 `searchQuery`（使用者正在輸入的文字）與 `appliedSearchQuery`（實際被套用至過濾邏輯的文字）。
-    - 移除 `isSearching` 狀態，改以 `appliedSearchQuery` 是否為空來判斷。
+#### [MODIFY] [LyricsModels.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/lyrics/model/LyricsModels.kt)
+- `LyricSegment`: 新增 `dictionaryForm: String` 欄位。
 
-2.  **搜尋函式 `performSearch` 實作**：
-    - 呼叫時將 `appliedSearchQuery` 設為當前的 `searchQuery`。
-    - 呼叫 `focusManager.clearFocus()` 收起鍵盤。
+#### [MODIFY] [SavedWord.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/core/data/database/SavedWord.kt)
+- 新增 `dictionaryForm` 欄位。
+- 移除 `songCover` 欄位。
 
-3.  **情境感知過濾邏輯**：
-    - **單字列表 (Leaf View / "全部" 模式)**：
-        - 根據 `appliedSearchQuery` 過濾 `savedWords`（比對日文、一般意思、上下文）。
-    - **類別列表 (Category View)**：
-        - 根據 `appliedSearchQuery` 過濾「歌曲標題」或「詞性名稱」。
+#### [MODIFY] [WordCache.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/core/data/database/WordCache.kt)
+- 新增 `dictionaryForm` 欄位。
 
-4.  **UI 互動優化**：
-    - 更新 `SearchBar` 的 `onQueryChange`，僅更新輸入狀態。
-    - 在搜尋框被手動清空時，同步重設 `appliedSearchQuery` 為空，以即時回復完整清單。
+#### [MODIFY] [AppDatabase.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/core/data/database/AppDatabase.kt)
+- 提升資料庫版本（Version 3），並確保使用毀滅性遷移或處理 Schema 變更。
+
+### 2. 邏輯層更新
+
+#### [MODIFY] [JapaneseProcessor.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/lyrics/processor/JapaneseProcessor.kt)
+- 更新 `processLine`: 從 Sudachi `Morpheme` 中提取 `dictionaryForm()` 並存入 `LyricSegment`。
+
+### 3. UI 介面優化
+
+#### [MODIFY] [VocabularyCard.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/VocabularyCard.kt)
+- **新增顯示**：在單字標題下方新增「辭書型 (Dictionary Form)」區塊。
+- **移除封面**：移除 `songCover` 相關參數與儲存邏輯。
+
+#### [MODIFY] [LyricPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/lyrics/ui/LyricPage.kt)
+- 移除傳遞給 `VocabularyCardContent` 的 `songCover` 參數。
+
+#### [MODIFY] [WordCardPage.kt](file:///C:/Users/fuala/AndroidStudioProjects/Learn_Japanese_with_Music/app/src/main/java/com/learn_japanese_with_music/features/vocabulary/ui/WordCardPage.kt)
+- **移除封面顯示**：
+    - 單字卡片背景改為純色或簡單樣式。
+    - 類別卡片（歌曲）不再顯示封面背景。
 
 ## 驗證計畫
 
 ### 手動驗證
-1.  **延遲套用驗證**：在搜尋框輸入文字，確認下方的列表**不會**立即變動。
-2.  **觸發驗證**：按下鍵盤搜尋鍵或螢幕按鈕，確認列表根據輸入內容進行過濾。
-3.  **類別搜尋驗證**：在「歌曲」模式下搜尋，確認顯示符合名稱的歌曲卡片。
-4.  **單字搜尋驗證**：在單一歌曲內搜尋，確認顯示該歌曲中符合條件的單字。
-5.  **重設驗證**：刪除搜尋框文字後，確認顯示狀態回復到原始完整清單。
+1. **單字卡檢查**：點擊歌詞單字，確認彈窗中出現「辭書型」資訊。
+2. **介面檢查**：確認 Word Card 頁面已完全移除歌曲封面圖的顯示，版面整潔一致。
+3. **持久化驗證**：收藏新單字後，確認「辭書型」能正確儲存並在重新開啟時顯示。

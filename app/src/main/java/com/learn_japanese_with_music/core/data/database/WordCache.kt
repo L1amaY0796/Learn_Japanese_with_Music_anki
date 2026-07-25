@@ -7,6 +7,7 @@ data class WordCache(
     val word: String,
     val contextLine: String,
     val splitMode: String,
+    val dictionaryForm: String,
     val jlptLevel: String,
     val generalMeaning: String,
     val contextualMeaning: String,

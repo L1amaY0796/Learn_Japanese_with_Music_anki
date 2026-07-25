@@ -245,15 +245,15 @@ fun WordCardPage(
                             
                             // 過濾詞性名稱
                             val filteredPOS = posGroups.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
-                            CategoryGrid(filteredPOS, null) { selectedCategoryValue = it }
+                            CategoryGrid(filteredPOS) { selectedCategoryValue = it }
                         }
                         WordCategoryMode.Song -> {
                             val songGroups = savedWords.groupBy { it.songTitle }
-                            val songList = songGroups.map { it.key to it.value.first().songCover }
+                            val songList = songGroups.map { it.key }
                             
                             // 過濾歌名
-                            val filteredSongs = songList.filter { it.first.contains(appliedSearchQuery, ignoreCase = true) }
-                            CategoryGrid(filteredSongs.map { it.first }, filteredSongs) { selectedCategoryValue = it }
+                            val filteredSongs = songList.filter { it.contains(appliedSearchQuery, ignoreCase = true) }
+                            CategoryGrid(filteredSongs) { selectedCategoryValue = it }
                         }
                     }
                 }
@@ -280,13 +280,12 @@ fun WordCardPage(
                 } catch (e: Exception) { emptyList() }
                 
                 VocabularyCardContent(
-                    segment = LyricSegment(word.word, word.reading, posList),
+                    segment = LyricSegment(word.word, word.reading, word.dictionaryForm, posList),
                     contextLine = word.contextLine,
                     settingsManager = settingsManager,
                     splitMode = word.splitMode,
                     songTitle = word.songTitle,
-                    songArtist = word.songArtist,
-                    songCover = word.songCover
+                    songArtist = word.songArtist
                 )
             }
         }
@@ -322,24 +321,6 @@ fun WordCardItem(word: SavedWord, onClick: (SavedWord) -> Unit) {
             .clickable { onClick(word) },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-//        Box(modifier = Modifier.fillMaxSize()) {
-//            // Background (Song cover with overlay)
-//            AsyncImage(
-//                model = word.songCover,
-//                contentDescription = null,
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier.fillMaxSize()
-//            )
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .background(
-//                        Brush.verticalGradient(
-//                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
-//                            startY = 50f
-//                        )
-//                    )
-//            )
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surfaceVariant
@@ -372,7 +353,6 @@ fun WordCardItem(word: SavedWord, onClick: (SavedWord) -> Unit) {
 @Composable
 fun CategoryGrid(
     categories: List<String>, 
-    songData: List<Pair<String, String>>? = null,
     onCategoryClick: (String) -> Unit
 ) {
     if (categories.isEmpty()) {
@@ -387,15 +367,14 @@ fun CategoryGrid(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(categories) { category ->
-                val coverUrl = songData?.find { it.first == category }?.second ?: ""
-                CategoryCard(category, coverUrl, onCategoryClick)
+                CategoryCard(category, onCategoryClick)
             }
         }
     }
 }
 
 @Composable
-fun CategoryCard(title: String, coverUrl: String, onClick: (String) -> Unit) {
+fun CategoryCard(title: String, onClick: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

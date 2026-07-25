@@ -284,8 +284,7 @@ fun LyricPage(
                     settingsManager = settingsManager,
                     splitMode = currentMode.name,
                     songTitle = lyrics?.title ?: "Unknown",
-                    songArtist = lyrics?.artist ?: "Unknown",
-                    songCover = lyrics?.cover ?: ""
+                    songArtist = lyrics?.artist ?: "Unknown"
                 )
             }
         }
