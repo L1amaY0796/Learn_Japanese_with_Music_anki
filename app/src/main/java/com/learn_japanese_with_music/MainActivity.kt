@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,11 +41,12 @@ import com.learn_japanese_with_music.features.lyrics.repository.LyricsRepository
 import com.learn_japanese_with_music.features.lyrics.ui.LyricPage
 import com.learn_japanese_with_music.features.settings.ui.SettingsPage
 import com.learn_japanese_with_music.features.vocabulary.ui.WordCardPage
+import com.learn_japanese_with_music.features.review_monitor.ui.ReviewMonitorPage
 import com.learn_japanese_with_music.features.explain.ui.FSRSExplanationPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-enum class Screen { Search, Settings, WordCard, FSRSExplanation }
+enum class Screen { Search, Settings, WordCard, FSRSExplanation, ReviewMonitor }
 
 class MainActivity : ComponentActivity() {
     private val japaneseProcessor = JapaneseProcessor.getInstance()
@@ -78,7 +80,7 @@ class MainActivity : ComponentActivity() {
                     drawerContent = {
                         ModalDrawerSheet {
                             Column(
-                                modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 18.dp),
+                                modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 30.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
@@ -108,7 +110,27 @@ class MainActivity : ComponentActivity() {
                                     },
                                     icon = { Icon(Icons.Default.MenuBook, contentDescription = null) }
                                 )
-                                
+
+                                NavigationDrawerItem(
+                                    label = { Text("Review Monitor", style = MaterialTheme.typography.titleMedium) },
+                                    selected = currentScreen == Screen.ReviewMonitor,
+                                    onClick = {
+                                        currentScreen = Screen.ReviewMonitor
+                                        scope.launch { drawerState.close() }
+                                    },
+                                    icon = { Icon(Icons.Default.MonitorHeart, contentDescription = null) }
+                                )
+
+                                NavigationDrawerItem(
+                                    label = { Text("Review Guide", style = MaterialTheme.typography.titleMedium) },
+                                    selected = currentScreen == Screen.FSRSExplanation,
+                                    onClick = {
+                                        currentScreen = Screen.FSRSExplanation
+                                        scope.launch { drawerState.close() }
+                                    },
+                                    icon = { Icon(Icons.Default.Info, contentDescription = null) }
+                                )
+
                                 NavigationDrawerItem(
                                     label = { Text("Settings", style = MaterialTheme.typography.titleMedium) },
                                     selected = currentScreen == Screen.Settings,
@@ -117,16 +139,6 @@ class MainActivity : ComponentActivity() {
                                         scope.launch { drawerState.close() }
                                     },
                                     icon = { Icon(Icons.Default.Settings, contentDescription = null) }
-                                )
-
-                                NavigationDrawerItem(
-                                    label = { Text("Review Scheme", style = MaterialTheme.typography.titleMedium) },
-                                    selected = currentScreen == Screen.FSRSExplanation,
-                                    onClick = {
-                                        currentScreen = Screen.FSRSExplanation
-                                        scope.launch { drawerState.close() }
-                                    },
-                                    icon = { Icon(Icons.Default.Info, contentDescription = null) }
                                 )
                             }
                         }
@@ -161,6 +173,11 @@ class MainActivity : ComponentActivity() {
                         }
                         Screen.FSRSExplanation -> {
                             FSRSExplanationPage(
+                                onMenuClick = { scope.launch { drawerState.open() } }
+                            )
+                        }
+                        Screen.ReviewMonitor -> {
+                            ReviewMonitorPage(
                                 onMenuClick = { scope.launch { drawerState.open() } }
                             )
                         }
