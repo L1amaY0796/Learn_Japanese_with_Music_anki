@@ -136,10 +136,10 @@ fun WordCardPage(
                                 contentDescription = "category selector right",
                             )
                         Text(
-                            text = "分類方式 : ${when(categoryMode) {
-                                WordCategoryMode.All -> "全部"
-                                WordCategoryMode.POS -> "詞性"
-                                WordCategoryMode.Song -> "歌曲"
+                            text = "Category : ${when(categoryMode) {
+                                WordCategoryMode.All -> "All"
+                                WordCategoryMode.POS -> "POS."
+                                WordCategoryMode.Song -> "Song"
                             }}",
                             style = MaterialTheme.typography.labelLarge,
                         )
@@ -156,9 +156,9 @@ fun WordCardPage(
                         DropdownMenuItem(
                             text = { 
                                 Text(when(mode) {
-                                    WordCategoryMode.All -> "全部"
-                                    WordCategoryMode.POS -> "詞性"
-                                    WordCategoryMode.Song -> "歌曲"
+                                    WordCategoryMode.All -> "All"
+                                    WordCategoryMode.POS -> "POS."
+                                    WordCategoryMode.Song -> "Song"
                                 })
                             },
                             onClick = {
@@ -194,14 +194,14 @@ fun WordCardPage(
                     Column {
                         if (appliedSearchQuery.isNotBlank()) {
                             Text(
-                                text = "搜尋「$selectedCategoryValue」中 : \"$appliedSearchQuery\"",
+                                text = "Search in「$selectedCategoryValue」for \"$appliedSearchQuery\"",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
                         } else {
                             Text(
-                                text = "分類 : $selectedCategoryValue",
+                                text = "Category : $selectedCategoryValue",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(bottom = 16.dp)
@@ -228,7 +228,7 @@ fun WordCardPage(
                             Column {
                                 if (appliedSearchQuery.isNotBlank()) {
                                     Text(
-                                        text = "搜尋全部單字 : $appliedSearchQuery",
+                                        text = "Search through All : $appliedSearchQuery",
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.padding(bottom = 16.dp)
@@ -297,7 +297,7 @@ fun WordCardPage(
 fun SavedWordGrid(words: List<SavedWord>, onWordClick: (SavedWord) -> Unit) {
     if (words.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("查無單字", color = MaterialTheme.colorScheme.outline)
+            Text("Word Not Found", color = MaterialTheme.colorScheme.outline)
         }
     } else {
         LazyVerticalGrid(
