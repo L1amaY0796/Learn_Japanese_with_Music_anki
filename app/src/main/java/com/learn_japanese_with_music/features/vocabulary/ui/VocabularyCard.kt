@@ -2,17 +2,16 @@ package com.learn_japanese_with_music.features.vocabulary.ui
 
 import android.R
 import androidx.annotation.Nullable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddToPhotos
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -268,7 +267,7 @@ fun VocabularyCardContent(
 
         // Action Button (Top Right)
         if (!isLoading && analysis != null) {
-            IconButton(
+            FilledIconButton(
                 onClick = {
                     scope.launch(Dispatchers.IO) {
                         if (isSaved) {
@@ -298,7 +297,10 @@ fun VocabularyCardContent(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 8.dp)
-                    .offset(y = (-18).dp, x = (-4).dp)
+                    .offset(y = 7.dp, x = (-5).dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = IconButtonDefaults
+                    .filledIconButtonColors(MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Icon(
                     imageVector = if (isSaved) Icons.Default.Delete else Icons.Default.AddToPhotos,

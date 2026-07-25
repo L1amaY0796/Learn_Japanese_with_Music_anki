@@ -28,6 +28,9 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
 import com.learn_japanese_with_music.core.utils.JapaneseSortUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -375,9 +378,15 @@ fun WordCardPage(
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
                 ) {
-                    Text("Start Review ($dueCount due)", fontWeight = FontWeight.Bold)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Icon(Icons.Default.AutoStories, contentDescription = null)
+                        Text("Start Review ($dueCount due)", fontFamily = FontFamily.Monospace,fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                    }
                 }
             }
 

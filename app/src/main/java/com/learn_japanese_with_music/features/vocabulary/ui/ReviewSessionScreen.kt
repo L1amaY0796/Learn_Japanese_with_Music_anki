@@ -5,8 +5,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -57,7 +60,7 @@ fun ReviewSessionScreen(
             TopAppBar(
                 title = { 
                     if (!isLoading) {
-                        Text("${currentIndex + 1} / ${dueWords.size}", style = MaterialTheme.typography.titleMedium)
+                        Text("${currentIndex + 1} / ${dueWords.size}", style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Monospace)
                     }
                 },
                 navigationIcon = {
@@ -86,12 +89,13 @@ fun ReviewSessionScreen(
             } else if (currentWord != null) {
                 Column(
                     modifier = Modifier.fillMaxSize().padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     // Progress Indicator
                     LinearProgressIndicator(
                         progress = (currentIndex + 1).toFloat() / dueWords.size,
-                        modifier = Modifier.fillMaxWidth().height(8.dp).padding(bottom = 24.dp),
+                        modifier = Modifier.fillMaxWidth().height(5.dp),
                         strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
                     )
 
@@ -103,8 +107,6 @@ fun ReviewSessionScreen(
                         onReveal = { isRevealed = true },
                         modifier = Modifier.weight(1f)
                     )
-
-                    Spacer(modifier = Modifier.height(24.dp))
 
                     // Buttons (only when revealed)
                     if (isRevealed) {
@@ -129,7 +131,13 @@ fun ReviewSessionScreen(
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Reveal Answer", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ){
+                                Icon(Icons.Default.Cached, contentDescription = null)
+                                Text("Reveal Answer", fontFamily = FontFamily.Monospace,fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                            }
                         }
                     }
                 }

@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,10 +41,11 @@ import com.learn_japanese_with_music.features.lyrics.repository.LyricsRepository
 import com.learn_japanese_with_music.features.lyrics.ui.LyricPage
 import com.learn_japanese_with_music.features.settings.ui.SettingsPage
 import com.learn_japanese_with_music.features.vocabulary.ui.WordCardPage
+import com.learn_japanese_with_music.features.vocabulary.ui.FSRSExplanationPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-enum class Screen { Search, Settings, WordCard }
+enum class Screen { Search, Settings, WordCard, FSRSExplanation }
 
 class MainActivity : ComponentActivity() {
     private val japaneseProcessor = JapaneseProcessor.getInstance()
@@ -117,6 +119,16 @@ class MainActivity : ComponentActivity() {
                                     },
                                     icon = { Icon(Icons.Default.Settings, contentDescription = null) }
                                 )
+
+                                NavigationDrawerItem(
+                                    label = { Text("Review Guide", style = MaterialTheme.typography.titleMedium) },
+                                    selected = currentScreen == Screen.FSRSExplanation,
+                                    onClick = {
+                                        currentScreen = Screen.FSRSExplanation
+                                        scope.launch { drawerState.close() }
+                                    },
+                                    icon = { Icon(Icons.Default.Info, contentDescription = null) }
+                                )
                             }
                         }
                     }
@@ -145,6 +157,11 @@ class MainActivity : ComponentActivity() {
                         Screen.WordCard -> {
                             WordCardPage(
                                 settingsManager = settingsManager,
+                                onMenuClick = { scope.launch { drawerState.open() } }
+                            )
+                        }
+                        Screen.FSRSExplanation -> {
+                            FSRSExplanationPage(
                                 onMenuClick = { scope.launch { drawerState.open() } }
                             )
                         }
