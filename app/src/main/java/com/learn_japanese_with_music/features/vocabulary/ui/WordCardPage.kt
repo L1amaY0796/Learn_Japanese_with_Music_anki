@@ -1,12 +1,15 @@
 package com.learn_japanese_with_music.features.vocabulary.ui
 
+import android.graphics.drawable.shapes.RoundRectShape
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -17,12 +20,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.gson.Gson
 import com.learn_japanese_with_music.core.components.HomeRectangleButton
@@ -331,6 +337,13 @@ fun WordCardItem(word: SavedWord, onClick: (SavedWord) -> Unit) {
                     .padding(8.dp)
             ) {
                 Text(
+                    text = word.reading,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
                     text = word.word,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -338,6 +351,19 @@ fun WordCardItem(word: SavedWord, onClick: (SavedWord) -> Unit) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                if(word.dictionaryForm.isNotEmpty() && !word.dictionaryForm.equals(word.word))
+                    Text(
+                        text = "原型 : ${word.dictionaryForm}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                else
+                    Text(text = " ",style = MaterialTheme.typography.labelLarge,)
+
                 Text(
                     text = word.generalMeaning,
                     style = MaterialTheme.typography.labelLarge,
@@ -378,11 +404,19 @@ fun CategoryCard(title: String, onClick: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .border(
+                3.dp,
+                MaterialTheme.colorScheme.onSurfaceVariant,
+                shape = RoundedCornerShape(11.dp)
+            )
             .aspectRatio(1.5f)
             .clickable { onClick(title) },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
             Text(
                 text = title,
                 modifier = Modifier
