@@ -1,6 +1,8 @@
 package com.learn_japanese_with_music.features.review_monitor.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.learn_japanese_with_music.core.components.MenuButton
@@ -96,7 +100,7 @@ fun ReviewMonitorPage(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Words: ${filteredWords.size}",
+                    text = "Words : ${filteredWords.size}",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -120,7 +124,8 @@ fun ReviewMonitorPage(
                             contentDescription = "Sort",
                             modifier = Modifier.graphicsLayer {
                                 rotationX = if (sortDescending) 180f else 0f
-                            }
+                            },
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -178,87 +183,125 @@ fun MonitorItem(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = word.word,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (word.reading.isNotEmpty()) {
+        Box(){
+//                Column(
+//                    modifier = Modifier.align(Alignment.Center),
+//                ) {
+//                    Surface(
+//                        color = MaterialTheme.colorScheme.errorContainer,
+//                        shape = RoundedCornerShape(4.dp),
+//                        tonalElevation = 50.dp
+//
+//                    ) {
+//                        TextButton(
+//                            onClick = onUnsuspend,
+//                            contentPadding = PaddingValues(0.dp),
+//                            modifier = Modifier
+//                                .height(26.dp)
+//                                .background(MaterialTheme.colorScheme.errorContainer),
+//                            elevation = ButtonDefaults.elevatedButtonElevation(6.dp)
+//
+//                        ) {
+//                            Text(
+//                                "Unsuspend",
+//                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 22.sp),
+//                                color = MaterialTheme.colorScheme.onErrorContainer,
+//                                //modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+//                            )
+//                        }
+//                    }
+//                }
+
+
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(//word
+                            text = word.word,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Surface(//stability
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = "Stability : $stabilityText",
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    if (word.reading.isNotEmpty()) {//reading
                         Text(
                             text = word.reading,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    Surface(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Text(
-                            text = "S: $stabilityText",
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    if (word.state == 4 || word.lapses >= 6) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Surface(
-                            color = MaterialTheme.colorScheme.errorContainer,
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Text(
-                                text = if (word.state == 4) "SUSPENDED" else "LEECH",
-                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                            )
-                        }
-                        if (word.state == 4) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            TextButton(
-                                onClick = onUnsuspend,
-                                contentPadding = PaddingValues(0.dp),
-                                modifier = Modifier.height(24.dp)
-                            ) {
-                                Text(
-                                    "Unsuspend",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                )
-                            }
-                        }
                     }
                 }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Row(//Retrievable
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(
+                            text = "$rPercent%",
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = if (rPercent < 80) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = " can recall",
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = if (rPercent < 80) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Text(//due time
+                        text = if (word.due <= System.currentTimeMillis()) dueText else "next review $dueText",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (word.due <= System.currentTimeMillis()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
+                    )
+                }
             }
-            
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "$rPercent%",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = if (rPercent < 80) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = dueText,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (word.due <= System.currentTimeMillis()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
-                )
+
+            //unsuspend btn
+            if (word.state == 4) {
+                Button(
+                    onClick = onUnsuspend,
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.errorContainer),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .fillMaxWidth(0.47f)
+                        .fillMaxHeight(0.7f),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                ) {
+                    Text(
+                        "Unsuspend",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 22.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        //modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                    )
+                }
             }
         }
+
     }
 }

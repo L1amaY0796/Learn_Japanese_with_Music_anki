@@ -6,6 +6,7 @@ data class WordAnalysis(
     @SerializedName("jlpt_level") val jlptLevel: String,
     @SerializedName("general_meaning") val generalMeaning: String,
     @SerializedName("contextual_meaning") val contextualMeaning: String,
+    @SerializedName("grammar_explanation") val grammarExplanation: String,
     @SerializedName("common_usages") val commonUsages: List<UsageExample>
 )
 

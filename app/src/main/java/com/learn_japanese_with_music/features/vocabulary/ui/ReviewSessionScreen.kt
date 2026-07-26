@@ -278,7 +278,7 @@ private suspend fun processReview(database: AppDatabase, word: SavedWord, grade:
     var nextStability = word.stability
     var nextState = word.state
     var nextInterval = 0
-    
+
     if (word.reps == 0) {
         // Initial review (New -> Learning)
         nextDifficulty = FSRSEngine.initDifficulty(grade)

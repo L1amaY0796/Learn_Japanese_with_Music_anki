@@ -11,6 +11,7 @@ data class WordCache(
     val jlptLevel: String,
     val generalMeaning: String,
     val contextualMeaning: String,
+    val grammarExplanation: String = "",
     val commonUsages: String, // Store as JSON string (List of UsageExample)
     val timestamp: Long = System.currentTimeMillis()
 )

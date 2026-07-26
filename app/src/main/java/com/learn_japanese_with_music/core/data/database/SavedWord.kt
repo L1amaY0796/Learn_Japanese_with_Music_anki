@@ -13,6 +13,7 @@ data class SavedWord(
     val jlptLevel: String,
     val generalMeaning: String,
     val contextualMeaning: String,
+    val grammarExplanation: String = "",
     val commonUsages: String, // Store as JSON string (List of UsageExample)
     val notes: String = "",
     val songTitle: String,

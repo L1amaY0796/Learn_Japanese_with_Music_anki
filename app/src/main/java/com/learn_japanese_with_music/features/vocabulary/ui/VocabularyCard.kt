@@ -76,6 +76,7 @@ fun VocabularyCardContent(
                 jlptLevel = saved.jlptLevel,
                 generalMeaning = saved.generalMeaning,
                 contextualMeaning = saved.contextualMeaning,
+                grammarExplanation = saved.grammarExplanation,
                 commonUsages = try { gson.fromJson(saved.commonUsages, listType) } catch (e: Exception) { emptyList() }
             )
             isLoading = false
@@ -93,6 +94,7 @@ fun VocabularyCardContent(
                 jlptLevel = cache.jlptLevel,
                 generalMeaning = cache.generalMeaning,
                 contextualMeaning = cache.contextualMeaning,
+                grammarExplanation = cache.grammarExplanation,
                 commonUsages = try { gson.fromJson(cache.commonUsages, listType) } catch (e: Exception) { emptyList() }
             )
             isLoading = false
@@ -125,6 +127,7 @@ fun VocabularyCardContent(
                             jlptLevel = result.jlptLevel,
                             generalMeaning = result.generalMeaning,
                             contextualMeaning = result.contextualMeaning,
+                            grammarExplanation = result.grammarExplanation,
                             commonUsages = gson.toJson(result.commonUsages)
                         )
                     )
@@ -285,6 +288,7 @@ fun VocabularyCardContent(
                                 jlptLevel = analysis!!.jlptLevel,
                                 generalMeaning = analysis!!.generalMeaning,
                                 contextualMeaning = analysis!!.contextualMeaning,
+                                grammarExplanation = analysis!!.grammarExplanation,
                                 commonUsages = gson.toJson(analysis!!.commonUsages),
                                 notes = userNotes,
                                 songTitle = songTitle,
@@ -334,6 +338,15 @@ fun AnalysisDetails(analysis: WordAnalysis) {
 
         SectionTitle("歌詞中的用法")
         Text(text = analysis.contextualMeaning, style = MaterialTheme.typography.bodySmall.copy(lineHeight = 35.sp))
+
+        if (analysis.grammarExplanation.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionTitle("文法說明")
+            val formattedGrammar = analysis.grammarExplanation
+                .replace(Regex("""\s*(\d+\.)"""), "\n$1")
+                .trim()
+            Text(text = formattedGrammar, style = MaterialTheme.typography.bodySmall.copy(lineHeight = 35.sp))
+        }
 
         if (analysis.commonUsages.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
