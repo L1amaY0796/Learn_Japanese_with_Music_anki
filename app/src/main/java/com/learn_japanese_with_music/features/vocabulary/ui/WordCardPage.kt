@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.ElectricBolt
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
 import com.learn_japanese_with_music.core.utils.JapaneseSortUtils
@@ -68,6 +69,7 @@ fun WordCardPage(
     
     // FSRS Review state
     var isReviewing by remember { mutableStateOf(false) }
+    var isCramming by remember { mutableStateOf(false) }
     var dueCount by remember { mutableIntStateOf(0) }
     
     val focusManager = LocalFocusManager.current
@@ -368,23 +370,60 @@ fun WordCardPage(
             }
 
             // Sticky Bottom Review Button
-            if (dueCount > 0) {
-                Button(
-                    onClick = { isReviewing = true },
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (dueCount > 0) {
+                    Button(
+                        onClick = { isReviewing = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(7.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.AutoStories, contentDescription = null)
+                            Text(
+                                "Start Review ($dueCount due)",
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+
+                // Cram Mode Button
+                OutlinedButton(
+                    onClick = { isCramming = true },
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(48.dp),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.tertiary
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f))
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(7.dp),
                         verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Icon(Icons.Default.AutoStories, contentDescription = null)
-                        Text("Start Review ($dueCount due)", fontFamily = FontFamily.Monospace,fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                    ) {
+                        Icon(Icons.Default.ElectricBolt, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text(
+                            "Cram Mode (All Words)",
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
                     }
                 }
             }
@@ -394,6 +433,22 @@ fun WordCardPage(
                     settingsManager = settingsManager,
                     onClose = { 
                         isReviewing = false
+                        // Refresh words
+                        scope.launch {
+                            savedWords = withContext(Dispatchers.IO) {
+                                database.savedWordDao().getAllSavedWords()
+                            }
+                        }
+                    }
+                )
+            }
+
+            if (isCramming) {
+                ReviewSessionScreen(
+                    settingsManager = settingsManager,
+                    isCramMode = true,
+                    onClose = {
+                        isCramming = false
                         // Refresh words
                         scope.launch {
                             savedWords = withContext(Dispatchers.IO) {

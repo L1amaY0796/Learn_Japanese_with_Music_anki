@@ -21,9 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.learn_japanese_with_music.core.components.MenuButton
 import com.learn_japanese_with_music.core.components.SearchBar
+import com.learn_japanese_with_music.core.data.SettingsManager
 import com.learn_japanese_with_music.core.data.database.AppDatabase
 import com.learn_japanese_with_music.core.data.database.SavedWord
 import com.learn_japanese_with_music.core.utils.ReviewCalculator
+import com.learn_japanese_with_music.features.vocabulary.ui.ReviewSessionScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +33,8 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun ReviewMonitorPage(
-    onMenuClick: () -> Unit
+    settingsManager: SettingsManager,
+    onMenuClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val database = remember { AppDatabase.getDatabase(context) }
@@ -43,6 +46,9 @@ fun ReviewMonitorPage(
     
     // Sorting modes: 0: Due Date, 1: Familiarity, 2: Stability
     var sortMode by remember { mutableIntStateOf(0) }
+    
+    var isCramming by remember { mutableStateOf(false) }
+    val workload = remember(words) { ReviewCalculator.calculateWorkload(words) }
 
     LaunchedEffect(Unit) {
         words = withContext(Dispatchers.IO) {
@@ -92,6 +98,11 @@ fun ReviewMonitorPage(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+            
+            // Workload Chart
+            ReviewWorkloadChart(
+                workload = workload
+            ) { isCramming = true }
 
             // Controls: Sort
             Row(
@@ -162,6 +173,22 @@ fun ReviewMonitorPage(
                     )
                 }
             }
+        }
+        
+        if (isCramming) {
+            ReviewSessionScreen(
+                settingsManager = settingsManager,
+                isCramMode = true,
+                onClose = {
+                    isCramming = false
+                    // Refresh words
+                    scope.launch {
+                        words = withContext(Dispatchers.IO) {
+                            database.savedWordDao().getAllSavedWords()
+                        }
+                    }
+                }
+            )
         }
     }
 }

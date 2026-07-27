@@ -26,6 +26,7 @@ import com.learn_japanese_with_music.core.data.SettingsManager
 import com.learn_japanese_with_music.core.data.database.AppDatabase
 import com.learn_japanese_with_music.core.data.database.SavedWord
 import com.learn_japanese_with_music.core.utils.FSRSEngine
+import com.learn_japanese_with_music.core.utils.ReviewCalculator
 import com.learn_japanese_with_music.features.lyrics.model.LyricSegment
 import com.learn_japanese_with_music.core.theme.appTheme
 import kotlinx.coroutines.Dispatchers
@@ -36,22 +37,30 @@ import kotlinx.coroutines.withContext
 @Composable
 fun ReviewSessionScreen(
     settingsManager: SettingsManager,
+    isCramMode: Boolean = false,
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
     val database = remember { AppDatabase.getDatabase(context) }
     val scope = rememberCoroutineScope()
     
-    var dueWords by remember { mutableStateOf<List<SavedWord>>(emptyList()) }
+    var sessionWords by remember { mutableStateOf<List<SavedWord>>(emptyList()) }
     var currentIndex by remember { mutableStateOf(0) }
     var isRevealed by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     
-    val currentWord = dueWords.getOrNull(currentIndex)
+    val currentWord = sessionWords.getOrNull(currentIndex)
     
     LaunchedEffect(Unit) {
-        dueWords = withContext(Dispatchers.IO) {
-            database.savedWordDao().getDueWords(System.currentTimeMillis())
+        sessionWords = withContext(Dispatchers.IO) {
+            if (isCramMode) {
+                // Fetch all words that are not suspended
+                val all = database.savedWordDao().getAllSavedWords()
+                all.filter { it.state < 4 }
+                    .sortedBy { ReviewCalculator.calculateR(it) } // Prioritize most forgotten
+            } else {
+                database.savedWordDao().getDueWords(System.currentTimeMillis())
+            }
         }
         isLoading = false
     }
@@ -60,7 +69,8 @@ fun ReviewSessionScreen(
             TopAppBar(
                 title = { 
                     if (!isLoading) {
-                        Text("${currentIndex + 1} / ${dueWords.size}", style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Monospace)
+                        val titlePrefix = if (isCramMode) "Cram Mode: " else ""
+                        Text("$titlePrefix${currentIndex + 1} / ${sessionWords.size}", style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Monospace)
                     }
                 },
                 navigationIcon = {
@@ -74,13 +84,13 @@ fun ReviewSessionScreen(
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (dueWords.isEmpty()) {
+            } else if (sessionWords.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("No words due for review!", style = MaterialTheme.typography.headlineSmall)
+                    Text(if (isCramMode) "No words to review!" else "No words due for review!", style = MaterialTheme.typography.headlineSmall)
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = onClose) {
                         Text("Go Back")
@@ -94,7 +104,7 @@ fun ReviewSessionScreen(
                 ) {
                     // Progress Indicator
                     LinearProgressIndicator(
-                        progress = (currentIndex + 1).toFloat() / dueWords.size,
+                        progress = { (currentIndex + 1).toFloat() / sessionWords.size },
                         modifier = Modifier.fillMaxWidth().height(5.dp),
                         strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
                     )
@@ -115,7 +125,7 @@ fun ReviewSessionScreen(
                                 scope.launch(Dispatchers.IO) {
                                     processReview(database, currentWord, grade)
                                     withContext(Dispatchers.Main) {
-                                        if (currentIndex < dueWords.size - 1) {
+                                        if (currentIndex < sessionWords.size - 1) {
                                             currentIndex++
                                             isRevealed = false
                                         } else {

@@ -178,6 +178,7 @@ class MainActivity : ComponentActivity() {
                         }
                         Screen.ReviewMonitor -> {
                             ReviewMonitorPage(
+                                settingsManager = settingsManager,
                                 onMenuClick = { scope.launch { drawerState.open() } }
                             )
                         }

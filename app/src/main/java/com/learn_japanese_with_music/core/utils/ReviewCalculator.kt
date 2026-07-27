@@ -39,4 +39,32 @@ object ReviewCalculator {
             "${(stability / 365.0).roundToInt()}y"
         }
     }
+
+    fun calculateWorkload(words: List<SavedWord>): List<Int> {
+        val dayMillis = 24 * 60 * 60 * 1000L
+        val workload = MutableList(7) { 0 }
+
+        // Start of today (00:00:00)
+        val calendar = java.util.Calendar.getInstance()
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        val startOfToday = calendar.timeInMillis
+
+        for (word in words) {
+            if (word.state == 4) continue // Skip suspended
+            
+            val diff = word.due - startOfToday
+            val dayIndex = (diff / dayMillis).toInt()
+            
+            if (dayIndex < 0) {
+                // Overdue words count as "Today"
+                workload[0]++
+            } else if (dayIndex < 7) {
+                workload[dayIndex]++
+            }
+        }
+        return workload
+    }
 }
