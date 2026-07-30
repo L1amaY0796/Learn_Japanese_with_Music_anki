@@ -1,6 +1,6 @@
 package com.learn_japanese_with_music.features.review_monitor.ui
 
-import androidx.compose.foundation.background
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.learn_japanese_with_music.core.components.MenuButton
@@ -26,10 +25,11 @@ import com.learn_japanese_with_music.core.data.database.AppDatabase
 import com.learn_japanese_with_music.core.data.database.SavedWord
 import com.learn_japanese_with_music.core.utils.ReviewCalculator
 import com.learn_japanese_with_music.features.vocabulary.ui.ReviewSessionScreen
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.ui.platform.LocalFocusManager
+
 
 @Composable
 fun ReviewMonitorPage(
@@ -42,6 +42,7 @@ fun ReviewMonitorPage(
     
     var words by remember { mutableStateOf<List<SavedWord>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
+    var focusManager = LocalFocusManager.current
     var sortDescending by remember { mutableStateOf(false) } // Default Ascending (soonest due first)
     
     // Sorting modes: 0: Due Date, 1: Familiarity, 2: Stability
@@ -83,12 +84,22 @@ fun ReviewMonitorPage(
                 .fillMaxSize()
                 .padding(top = 48.dp, start = 16.dp, end = 16.dp)
         ) {
+            BackHandler() {
+                focusManager.clearFocus()
+                onMenuClick()
+            }
+
             // Header: Menu + Search
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                MenuButton(onClick = onMenuClick)
+                MenuButton(
+                    onClick = {
+                        focusManager.clearFocus()
+                        onMenuClick()
+                    }
+                )
                 Spacer(modifier = Modifier.width(12.dp))
                 SearchBar(
                     query = searchQuery,
@@ -176,6 +187,16 @@ fun ReviewMonitorPage(
         }
         
         if (isCramming) {
+            BackHandler() {
+                isCramming = false
+                // Refresh words
+                scope.launch {
+                    words = withContext(Dispatchers.IO) {
+                        database.savedWordDao().getAllSavedWords()
+                    }
+                }
+            }
+
             ReviewSessionScreen(
                 settingsManager = settingsManager,
                 isCramMode = true,
@@ -211,35 +232,6 @@ fun MonitorItem(
         )
     ) {
         Box(){
-//                Column(
-//                    modifier = Modifier.align(Alignment.Center),
-//                ) {
-//                    Surface(
-//                        color = MaterialTheme.colorScheme.errorContainer,
-//                        shape = RoundedCornerShape(4.dp),
-//                        tonalElevation = 50.dp
-//
-//                    ) {
-//                        TextButton(
-//                            onClick = onUnsuspend,
-//                            contentPadding = PaddingValues(0.dp),
-//                            modifier = Modifier
-//                                .height(26.dp)
-//                                .background(MaterialTheme.colorScheme.errorContainer),
-//                            elevation = ButtonDefaults.elevatedButtonElevation(6.dp)
-//
-//                        ) {
-//                            Text(
-//                                "Unsuspend",
-//                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 22.sp),
-//                                color = MaterialTheme.colorScheme.onErrorContainer,
-//                                //modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-//                            )
-//                        }
-//                    }
-//                }
-
-
             Row(
                 modifier = Modifier
                     .padding(16.dp)
@@ -324,7 +316,6 @@ fun MonitorItem(
                             fontSize = 22.sp
                         ),
                         color = MaterialTheme.colorScheme.onErrorContainer,
-                        //modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                     )
                 }
             }

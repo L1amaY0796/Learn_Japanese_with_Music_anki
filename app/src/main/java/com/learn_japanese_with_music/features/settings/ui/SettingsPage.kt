@@ -1,5 +1,6 @@
 package com.learn_japanese_with_music.features.settings.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,6 +30,11 @@ fun SettingsPage(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
+        BackHandler() {
+            focusManager.clearFocus()
+            onMenuClick()
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()

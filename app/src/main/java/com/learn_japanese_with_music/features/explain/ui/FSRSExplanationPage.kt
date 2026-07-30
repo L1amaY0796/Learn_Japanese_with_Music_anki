@@ -1,5 +1,6 @@
 package com.learn_japanese_with_music.features.explain.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -20,6 +21,10 @@ fun FSRSExplanationPage(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
+        BackHandler() {
+            onMenuClick()
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()

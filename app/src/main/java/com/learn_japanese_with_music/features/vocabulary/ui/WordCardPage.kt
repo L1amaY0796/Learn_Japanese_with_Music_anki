@@ -1,5 +1,6 @@
 package com.learn_japanese_with_music.features.vocabulary.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -244,6 +245,12 @@ fun WordCardPage(
                 // Content Area
                 Box(modifier = Modifier.fillMaxWidth(1f)) {
                     if (selectedCategoryValue != null) { //at word card level(except All mode)
+
+                        BackHandler() {
+                            focusManager.clearFocus()
+                            selectedCategoryValue = null
+                        }
+
                         // Nested View: List of words in a specific category
                         val nestedWords = savedWords.filter {
                             val inCategory = when(categoryMode) {
@@ -290,6 +297,13 @@ fun WordCardPage(
                         // Main View (Category Selection or All)
                         when (categoryMode) {
                             WordCategoryMode.All -> {
+
+                                if (!(isReviewing || isCramming))
+                                    BackHandler() {
+                                        focusManager.clearFocus()
+                                        onMenuClick()
+                                    }
+
                                 val filteredAll = savedWords.filter {
                                     it.word.contains(appliedSearchQuery, ignoreCase = true) ||
                                     it.generalMeaning.contains(appliedSearchQuery, ignoreCase = true) ||
@@ -309,6 +323,10 @@ fun WordCardPage(
                                 }
                             }
                             WordCategoryMode.POS -> {
+                                BackHandler() {
+                                    focusManager.clearFocus()
+                                    categoryMode = WordCategoryMode.All
+                                }
                                 val posGroups = savedWords.flatMap { 
                                     try { Gson().fromJson<List<String>>(it.partOfSpeech, object : com.google.gson.reflect.TypeToken<List<String>>() {}.type) } 
                                     catch (e: Exception) { emptyList() }
@@ -323,6 +341,10 @@ fun WordCardPage(
                                 }
                             }
                             WordCategoryMode.Song -> {
+                                BackHandler() {
+                                    focusManager.clearFocus()
+                                    categoryMode = WordCategoryMode.All
+                                }
                                 val songGroups = savedWords.groupBy { it.songTitle }
                                 val songList = songGroups.map { it.key }
                                 
@@ -429,6 +451,16 @@ fun WordCardPage(
             }
 
             if (isReviewing) {
+                BackHandler() {
+                    isReviewing = false
+                    // Refresh words
+                    scope.launch {
+                        savedWords = withContext(Dispatchers.IO) {
+                            database.savedWordDao().getAllSavedWords()
+                        }
+                    }
+                }
+
                 ReviewSessionScreen(
                     settingsManager = settingsManager,
                     onClose = { 
@@ -444,6 +476,16 @@ fun WordCardPage(
             }
 
             if (isCramming) {
+                BackHandler() {
+                    isCramming = false
+                    // Refresh words
+                    scope.launch {
+                        savedWords = withContext(Dispatchers.IO) {
+                            database.savedWordDao().getAllSavedWords()
+                        }
+                    }
+                }
+
                 ReviewSessionScreen(
                     settingsManager = settingsManager,
                     isCramMode = true,

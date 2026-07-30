@@ -1,6 +1,5 @@
 package com.learn_japanese_with_music.features.lyrics.ui
 
-import android.R
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -161,6 +160,11 @@ fun LyricPage(
 
             // Search Row
             if (lyrics == null) {
+                BackHandler() {
+                    focusManager.clearFocus()
+                    onMenuClick()
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
