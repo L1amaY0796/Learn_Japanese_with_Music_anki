@@ -1,4 +1,4 @@
-**ENG**
+> **ENG**
 # What is this app for?
 This app is designed for Japanese learner to learn Japanese with music.
 You can search any jpop song, the app will fetch the lyrics, tokenizing the lyrics into words.
@@ -31,8 +31,8 @@ Fill in the Genius API Token and Gemini API Key you just applied.
 
 And well done. You can learn Japanese words from any jpop song now!
 
-***
-**中文**
+---
+> **中文**
 # 這個 App 有什麼功能？
 
 這款 App 專為日語學習者設計，讓你透過音樂學習日文。
