@@ -9,7 +9,7 @@ Additionally, the app will automatically arrange review test for you.
   
 ## Step 1
 To enable the searching and explaning function you'll need to apply for two FREE API key for yourself.  
-1. Genius API : https://genius.com/api-clients  
+**1. Genius API** : https://genius.com/api-clients  
 use FB/twitter/google to sign in -> click *new API client*  
   
 And then you will see four blank rows, you can follow my instruction to setup your API key :   
@@ -21,7 +21,7 @@ And finally, click *save*. You will see your own API client.
   
 Click on *Generate Access Token* and copy it.  
   
-2.Gemini API : https://aistudio.google.com/api-keys  
+**2. Gemini API** : https://aistudio.google.com/api-keys  
 click on *create API key button* which you may find on the right of the cornerw -> click *create key*  
 and you will be able to copy the api key then  
   
@@ -44,7 +44,7 @@ And well done. You can learn Japanese words from any jpop song now!
   
 為了啟用搜尋與解析功能，你需要自行申請兩組 **免費** 的 API 金鑰。  
 
-1. Genius API： https://genius.com/api-clients  
+**1. Genius API**： https://genius.com/api-clients  
 使用 FB / Twitter / Google 帳號登入，點選 *New API Client*。  
   
 在填寫欄位時，請參考以下設定：  
@@ -56,7 +56,7 @@ And well done. You can learn Japanese words from any jpop song now!
   
 點擊 *Generate Access Token* 並複製產生的 Token。  
   
-2. Gemini API： https://aistudio.google.com/api-keys  
+**2. Gemini API**： https://aistudio.google.com/api-keys  
 點選頁面右上角的 *Create API key* 按鈕，接著點選 *Create key*，即可複製你的 API 金鑰。  
   
 ## 第二步：設定 App
