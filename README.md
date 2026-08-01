@@ -44,19 +44,19 @@ And well done. You can learn Japanese words from any jpop song now!
 
 為了啟用搜尋與解析功能，你需要自行申請兩組 **免費** 的 API 金鑰。
 
-1. Genius API： https://genius.com/api-clients](https://genius.com/api-clients)
+1. Genius API： https://genius.com/api-clients
 使用 FB / Twitter / Google 帳號登入，點選 *New API Client*。
 
 在填寫欄位時，請參考以下設定：
 * APP name：自訂名稱（如果沒想法，可以填入 *uta learning*）。
 * Icon url：留空。
-* App website url：https://github.com/AlanFu1018/Learn_Japanese_with_Music](https://github.com/AlanFu1018/Learn_Japanese_with_Music)
+* App website url：https://github.com/AlanFu1018/Learn_Japanese_with_Music
 * Redirect url：留空。
 點擊 *Save* 後，你將看到你建立的 API Client。
 
 點擊 *Generate Access Token* 並複製產生的 Token。
 
-2. Gemini API： https://aistudio.google.com/api-keys](https://aistudio.google.com/api-keys)
+2. Gemini API： https://aistudio.google.com/api-keys
 點選頁面右上角的 *Create API key* 按鈕，接著點選 *Create key*，即可複製你的 API 金鑰。
 
 ## 第二步：設定 App
