@@ -9,7 +9,7 @@ Additionally, the app will automatically arrange review test for you.
 
 ## Step 1
 To enable the searching and explaning function you'll need to apply for two FREE API key for yourself.
-1. Genius API : https://genius.com/api-clients
+1. Genius API : https://genius.com/api-clients  
 use FB/twitter/google to sign in -> click *new API client*
 
 And then you will see four blank rows, you can follow my instruction to setup your API key : 
