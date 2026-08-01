@@ -31,7 +31,7 @@ Fill in the Genius API Token and Gemini API Key you just applied.
 
 And well done. You can learn Japanese words from any jpop song now!
 
-
+***
 **中文**
 # 這個 App 有什麼功能？
 
