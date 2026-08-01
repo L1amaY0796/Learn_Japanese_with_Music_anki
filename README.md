@@ -37,7 +37,7 @@ And well done. You can learn Japanese words from any jpop song now!
 
 
   
-> **中文**
+> **中文** ---
 # 這個 App 有什麼功能？
   
 這款 App 專為日語學習者設計，讓你透過音樂學習日文。  
