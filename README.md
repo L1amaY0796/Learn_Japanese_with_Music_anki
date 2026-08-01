@@ -3,8 +3,9 @@
 This app is designed for Japanese learner to learn Japanese with music.
 You can search any jpop song, the app will fetch the lyrics, tokenizing the lyrics into words.
 You can click on it to see its explanation about the meaning and syntax rule, and you may also save the word in the lyrics as word cards.
-Additionally, the app will automatically arrange review test for you.
-<br>
+Additionally, the app will automatically arrange review test for you. 
+
+ 
 # How to use this app?
 <br>
 ## Step 1
