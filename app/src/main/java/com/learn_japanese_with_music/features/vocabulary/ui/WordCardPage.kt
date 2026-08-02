@@ -294,7 +294,7 @@ fun WordCardPage(
                         }
 
                     } else {
-                        // Main View (Category Selection or All)
+                        // Category Selection or All)
                         when (categoryMode) {
                             WordCategoryMode.All -> {
 
