@@ -35,7 +35,7 @@ And well done. You can learn Japanese words from any jpop song now!
 
   
 
-
+---
   
 > **中文**
 # 這個 App 有什麼功能？
