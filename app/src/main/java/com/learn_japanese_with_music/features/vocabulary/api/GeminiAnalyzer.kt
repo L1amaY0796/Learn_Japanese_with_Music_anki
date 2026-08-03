@@ -30,7 +30,7 @@ class GeminiAnalyzer(private val apiKey: String, private val modelName: String) 
             1. jlpt_level: JLPT 級別 (N1-N5 或 "unknown")
             2. general_meaning: 通用的單字意思（請盡量貼合歌詞語境的解釋，減少閱讀割裂感）
             3. contextual_meaning: 在這段歌詞中的具體意思與用法（若與通用意思相同則簡述，若有特殊用法請詳述）
-            4. grammar_explanation: 文法說明。請解釋該單字可以如何接續（接續）或被接續（被接續），並說明在接續或被接續時，該單字或相關部分要如何進行變化（如：活用形、助詞配合等）。
+            4. grammar_explanation: 接續規則，說明該單字的前後接續方式（例如：前方需接動詞辭書形、名詞+の 等），說明在接續時，該單字或相鄰詞彙需要進行的活用變化，並特別標明必須搭配的「助詞」（如：に、を、が）。
             5. common_usages: 2-3 個與此單字「在歌詞中用法」相關的其他常見用法或例句。
                每個例句必須是一個包含以下欄位的 JSON 物件：
                - japanese: 日文句子

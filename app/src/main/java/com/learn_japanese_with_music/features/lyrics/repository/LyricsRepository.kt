@@ -1,5 +1,6 @@
 package com.learn_japanese_with_music.features.lyrics.repository
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import com.learn_japanese_with_music.core.data.SettingsManager
@@ -7,6 +8,7 @@ import com.learn_japanese_with_music.core.network.RetrofitClient
 import com.learn_japanese_with_music.features.lyrics.model.GeniusSong
 import com.learn_japanese_with_music.features.lyrics.model.SongData
 import com.learn_japanese_with_music.features.lyrics.processor.JapaneseProcessor
+import com.learn_japanese_with_music.core.utils.ShareSearch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -14,19 +16,47 @@ import org.jsoup.Jsoup
 class LyricsRepository(private val japaneseProcessor: JapaneseProcessor, private var settingsManager: SettingsManager) {
 
     /**
+     * 將分享的網址解析為可用於歌詞搜尋的關鍵字（歌名 歌手）
+     */
+    suspend fun resolveMetadataFromUrl(url: String): String? = withContext(Dispatchers.IO) {
+        try {
+            ShareSearch.resolveUrlToQuery(url)
+        } catch (e: Exception) {
+            Log.e("LyricsRepository", "Failed to resolve URL: $url", e)
+            null
+        }
+    }
+
+    /**
      * 搜尋歌曲列表，包含過濾、排序與分頁
      */
     suspend fun searchSongs(query: String, page: Int = 1): List<GeniusSong> = withContext(Dispatchers.IO) {
-        val searchResponse = RetrofitClient.geniusService.searchSongs(query, page)
-        val songs = searchResponse.response.hits.map { it.result }
-        
-        // 1. 過濾掉以 Genius 開頭的歌手 (如 Genius Romanizations, Genius English Translations 等)
-        val filteredSongs = songs.filter { !it.primary_artist.name.startsWith("Genius") }
-        
-        // 2. 優先顯示標題或歌手包含日文的歌曲
-        filteredSongs.sortedByDescending { song ->
-            val hasJapanese = containsJapanese(song.title) || containsJapanese(song.primary_artist.name)
-            if (hasJapanese) 1 else 0
+        try{
+            val searchResponse = RetrofitClient.geniusService.searchSongs(query, page)
+            val songs = searchResponse.response.hits.map { it.result }
+            Log.d("GeniusAPI", "Response: $searchResponse")
+
+            // 1. 過濾掉以 Genius 開頭的歌手 (如 Genius Romanizations, Genius English Translations 等)
+            val filteredSongs = songs.filter { !it.primary_artist.name.startsWith("Genius") }
+
+            // 2. 優先顯示標題或歌手包含日文的歌曲
+            filteredSongs.sortedByDescending { song ->
+                val hasJapanese = containsJapanese(song.title) || containsJapanese(song.primary_artist.name)
+                if (hasJapanese) 1 else 0
+            }
+        }catch (e: retrofit2.HttpException) {
+            // 針對 API 回傳錯誤 (例如 404, 500 等)
+            val errorBody = e.response()?.errorBody()?.string()
+            Log.e("GeniusAPI", "HTTP Error: ${e.code()}, Body: $errorBody")
+            emptyList()
+        } catch (e: java.io.IOException) {
+            // 針對連線問題 (例如無網路、逾時)
+            Log.e("GeniusAPI", "Network Error: ${e.message}")
+            emptyList()
+        } catch (e: Exception) {
+            // 其他非預期的錯誤
+            Log.e("GeniusAPI", "Unknown Error: ${e.message}")
+            emptyList()
         }
     }
 

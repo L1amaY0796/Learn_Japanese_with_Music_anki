@@ -1,5 +1,6 @@
 package com.learn_japanese_with_music
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +24,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +45,7 @@ import com.learn_japanese_with_music.features.settings.ui.SettingsPage
 import com.learn_japanese_with_music.features.vocabulary.ui.WordCardPage
 import com.learn_japanese_with_music.features.review_monitor.ui.ReviewMonitorPage
 import com.learn_japanese_with_music.features.explain.ui.FSRSExplanationPage
+import com.learn_japanese_with_music.core.utils.ShareSearch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -52,6 +55,8 @@ class MainActivity : ComponentActivity() {
     private val japaneseProcessor = JapaneseProcessor.getInstance()
     private lateinit var settingsManager: SettingsManager
     private lateinit var repository: LyricsRepository
+
+    private var incomingShareQuery = mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,11 +70,21 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             japaneseProcessor.initialize(this@MainActivity)
         }
+
+        handleIncomingIntent(intent)
         
         enableEdgeToEdge()
         setContent {
             appTheme {
                 var currentScreen by remember { mutableStateOf(Screen.Search) }
+
+                // Handle incoming share navigation
+                LaunchedEffect(incomingShareQuery.value) {
+                    if (incomingShareQuery.value != null) {
+                        currentScreen = Screen.Search
+                    }
+                }
+
                 var selectedSudachiMode by remember { mutableStateOf(settingsManager.sudachiSplitMode) }
                 
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -151,7 +166,9 @@ class MainActivity : ComponentActivity() {
                                 repository = repository,
                                 settingsManager = settingsManager,
                                 currentMode = selectedSudachiMode,
-                                onMenuClick = { scope.launch { drawerState.open() } }
+                                onMenuClick = { scope.launch { drawerState.open() } },
+                                externalQuery = incomingShareQuery.value,
+                                onQueryConsumed = { incomingShareQuery.value = null }
                             )
                         }
                         Screen.Settings -> {
@@ -187,4 +204,21 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIncomingIntent(intent)
+    }
+
+    private fun handleIncomingIntent(intent: Intent?) {
+        if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+            intent.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
+                // Use ShareSearch utility to extract query or URL
+                val cleanedQuery = ShareSearch.extractInitialData(text)
+                incomingShareQuery.value = cleanedQuery
+            }
+        }
+    }
+
+    // Removed local parseSpotifyShareText as it's now in ShareSearch.kt
 }

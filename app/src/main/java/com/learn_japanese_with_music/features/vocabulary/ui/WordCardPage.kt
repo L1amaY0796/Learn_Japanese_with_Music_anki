@@ -2,6 +2,7 @@ package com.learn_japanese_with_music.features.vocabulary.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -424,13 +425,14 @@ fun WordCardPage(
                 }
 
                 // Cram Mode Button
-                OutlinedButton(
+                Button(
                     onClick = { isCramming = true },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary.copy(0.22f),
                         contentColor = MaterialTheme.colorScheme.tertiary
                     ),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f))

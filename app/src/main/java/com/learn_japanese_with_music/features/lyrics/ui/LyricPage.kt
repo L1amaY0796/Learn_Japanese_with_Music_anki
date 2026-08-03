@@ -62,6 +62,7 @@ import com.learn_japanese_with_music.features.lyrics.model.SongData
 import com.learn_japanese_with_music.features.lyrics.processor.JapaneseProcessor
 import com.learn_japanese_with_music.features.lyrics.repository.LyricsRepository
 import com.learn_japanese_with_music.features.vocabulary.ui.VocabularyCardContent
+import com.learn_japanese_with_music.core.utils.ShareSearch
 import com.worksap.nlp.sudachi.Tokenizer
 import kotlinx.coroutines.launch
 
@@ -71,12 +72,15 @@ fun LyricPage(
     repository: LyricsRepository,
     settingsManager: SettingsManager,
     currentMode: Tokenizer.SplitMode,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    externalQuery: String? = null,
+    onQueryConsumed: () -> Unit = {}
 ) {
-    var query by remember { mutableStateOf("前前前世") }
+    var query by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<GeniusSong>>(emptyList()) }
     var lyrics by remember { mutableStateOf<SongData?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var isResolvingUrl by remember { mutableStateOf(false) }
     var isMoreLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     
@@ -147,6 +151,25 @@ fun LyricPage(
         }
     }
 
+    // Handle external search query (from share)
+    LaunchedEffect(externalQuery) {
+        if (externalQuery != null) {
+            if (ShareSearch.isUrl(externalQuery)) {
+                isResolvingUrl = true
+                val resolvedQuery = repository.resolveMetadataFromUrl(externalQuery)
+                isResolvingUrl = false
+                if (resolvedQuery != null) {
+                    query = resolvedQuery
+                    performSearch()
+                }
+            } else {
+                query = externalQuery
+                performSearch()
+            }
+            onQueryConsumed()
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -186,8 +209,21 @@ fun LyricPage(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            if (isLoading || isResolvingUrl) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    if (isResolvingUrl) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Resolving shared link...",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
             }
 
             errorMessage?.let {
