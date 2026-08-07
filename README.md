@@ -1,4 +1,4 @@
-![image(learn_japanese_with_music_repo_card.png)
+![image](learn_japanese_with_music_repo_card.png)
 > **ENG**
 # What is this app for?
 This app is designed for Japanese learner to learn Japanese with music.  
