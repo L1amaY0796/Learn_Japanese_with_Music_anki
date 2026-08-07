@@ -1,3 +1,4 @@
+![image](./app/src/main/uta_translate-playstore.png)
 > **ENG**
 # What is this app for?
 This app is designed for Japanese learner to learn Japanese with music.  
