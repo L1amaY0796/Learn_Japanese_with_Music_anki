@@ -23,6 +23,10 @@ interface SavedWordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSavedWord(savedWord: SavedWord)
 
+    /** Bulk insert (one transaction); rows whose key already exists are left untouched. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertSavedWordsIfAbsent(savedWords: List<SavedWord>)
+
     @Query("UPDATE SavedWord SET notes = :notes WHERE word = :word AND contextLine = :contextLine AND splitMode = :splitMode")
     suspend fun updateNotes(word: String, contextLine: String, splitMode: String, notes: String)
 

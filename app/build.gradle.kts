@@ -92,5 +92,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation("io.coil-kt:coil-compose:2.4.0")
+    // Reads current-format Anki packages (collection.anki21b is zstd-compressed)
+    implementation("com.github.luben:zstd-jni:1.5.7-4@aar")
 
 }

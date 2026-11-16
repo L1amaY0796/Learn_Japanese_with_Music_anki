@@ -31,7 +31,7 @@ import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.ElectricBolt
-import androidx.compose.material.icons.filled.IosShare
+import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
 import com.learn_japanese_with_music.core.utils.JapaneseSortUtils
@@ -61,7 +61,7 @@ fun WordCardPage(
     // For nested navigation (e.g., viewing words of a specific song)
     var selectedCategoryValue by remember { mutableStateOf<String?>(null) }
     var isMenuExpanded by remember { mutableStateOf(false) }
-    var showAnkiExport by remember { mutableStateOf(false) }
+    var showAnkiTransfer by remember { mutableStateOf(false) }
     
     // Word detail dialog state
     var selectedWordForDetail by remember { mutableStateOf<SavedWord?>(null) }
@@ -242,13 +242,13 @@ fun WordCardPage(
                         }
                     }
 
-                    // Export all saved words as an Anki deck
+                    // Export saved words as an Anki deck / import an Anki deck
                     SortTag(
-                        icon = Icons.Default.IosShare,
+                        icon = Icons.Default.ImportExport,
                         isSelected = false,
                         order = null,
-                        contentDescription = "Export to Anki",
-                        onClick = { showAnkiExport = true }
+                        contentDescription = "Anki import / export",
+                        onClick = { showAnkiTransfer = true }
                     )
                 }
 
@@ -373,10 +373,18 @@ fun WordCardPage(
                 }
             }
 
-            if (showAnkiExport) {
-                AnkiExportDialog(
+            if (showAnkiTransfer) {
+                AnkiTransferDialog(
                     words = savedWords,
-                    onDismiss = { showAnkiExport = false }
+                    splitMode = settingsManager.sudachiSplitMode.name,
+                    onImported = {
+                        scope.launch {
+                            savedWords = withContext(Dispatchers.IO) {
+                                database.savedWordDao().getAllSavedWords()
+                            }
+                        }
+                    },
+                    onDismiss = { showAnkiTransfer = false }
                 )
             }
 

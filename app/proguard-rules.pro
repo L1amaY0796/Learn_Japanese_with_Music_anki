@@ -54,6 +54,12 @@
 -dontwarn com.worksap.nlp.sudachi.**
 
 # ----------------------------------------------------------------------------------
+# Zstd (Anki package import) - classes are looked up by name from native code
+# ----------------------------------------------------------------------------------
+-keep class com.github.luben.zstd.** { *; }
+-dontwarn com.github.luben.zstd.**
+
+# ----------------------------------------------------------------------------------
 # Jsoup Rules (for Scraping)
 # ----------------------------------------------------------------------------------
 -keep class org.jsoup.** { *; }
