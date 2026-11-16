@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Files the app may hand to other apps through FileProvider. Must match AnkiExporter.SHARE_DIR. -->
+<paths>
+    <cache-path name="anki_export" path="anki_export/" />
+</paths>
